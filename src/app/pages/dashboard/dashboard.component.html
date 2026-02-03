@@ -1,0 +1,198 @@
+<!-- Page Header -->
+<div class="mb-6 sm:mb-8">
+  <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
+  <p class="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-600">Overview of your HRMS system</p>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="loading" class="flex justify-center items-center py-12 sm:py-20">
+  <div class="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-t-4 border-b-4 border-blue-600"></div>
+</div>
+
+<!-- Error State -->
+<div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg" role="alert">
+  <div class="flex">
+    <div class="flex-shrink-0">
+      <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+      </svg>
+    </div>
+    <div class="ml-3">
+      <p class="text-sm font-medium text-red-800">{{error}}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Grid -->
+<div *ngIf="stats" class="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6 sm:mb-8">
+  <!-- Card 1: Total Employees -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex-1 min-w-0">
+        <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Total Employees</p>
+        <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{stats.totalEmployees}}</p>
+        <p class="text-xs text-green-600 mt-2 flex items-center">
+          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path>
+          </svg>
+          Active
+        </p>
+      </div>
+      <div class="flex-shrink-0">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-blue-100 rounded-full flex items-center justify-center">
+          <svg class="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2: Total Departments -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex-1 min-w-0">
+        <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Total Departments</p>
+        <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{stats.totalDepartments}}</p>
+        <p class="text-xs text-gray-500 mt-2">Across organization</p>
+      </div>
+      <div class="flex-shrink-0">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-green-100 rounded-full flex items-center justify-center">
+          <svg class="w-6 h-6 sm:w-7 sm:h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3: Pending Leave Requests -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex-1 min-w-0">
+        <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Pending Leaves</p>
+        <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{stats.pendingLeaveRequests}}</p>
+        <p class="text-xs text-yellow-600 mt-2 flex items-center">
+          <svg class="w-4 h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+          </svg>
+          Awaiting approval
+        </p>
+      </div>
+      <div class="flex-shrink-0">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-yellow-100 rounded-full flex items-center justify-center">
+          <svg class="w-6 h-6 sm:w-7 sm:h-7 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 4: Pending OT Requests -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex-1 min-w-0">
+        <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Pending Overtime</p>
+        <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{stats.pendingOtRequests}}</p>
+        <p class="text-xs text-red-600 mt-2 flex items-center">
+          <svg class="w-4 h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+          </svg>
+          Requires action
+        </p>
+      </div>
+      <div class="flex-shrink-0">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-red-100 rounded-full flex items-center justify-center">
+          <svg class="w-6 h-6 sm:w-7 sm:h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Additional Content Section (Optional) -->
+<div *ngIf="stats" class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+  <!-- Recent Activity Card -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+    <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Quick Actions</h3>
+    <div class="space-y-3">
+      <a routerLink="/attendance" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors group">
+        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-900">Mark Attendance</p>
+          <p class="text-xs text-gray-500">Check in/out for today</p>
+        </div>
+      </a>
+      <a routerLink="/leaves" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors group">
+        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-900">Request Leave</p>
+          <p class="text-xs text-gray-500">Submit new leave request</p>
+        </div>
+      </a>
+      <a routerLink="/overtime" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors group">
+        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200">
+          <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-900">Request Overtime</p>
+          <p class="text-xs text-gray-500">Submit OT request</p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- System Status Card -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+    <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">System Overview</h3>
+    <div class="space-y-4">
+      <div>
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-gray-600">Employee Attendance Rate</span>
+          <span class="font-semibold text-gray-900">94%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="bg-green-500 h-2 rounded-full" style="width: 94%"></div>
+        </div>
+      </div>
+      <div>
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-gray-600">Leave Approval Rate</span>
+          <span class="font-semibold text-gray-900">87%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="bg-blue-500 h-2 rounded-full" style="width: 87%"></div>
+        </div>
+      </div>
+      <div>
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-gray-600">Overtime Utilization</span>
+          <span class="font-semibold text-gray-900">62%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="bg-yellow-500 h-2 rounded-full" style="width: 62%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

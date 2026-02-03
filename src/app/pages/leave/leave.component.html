@@ -1,0 +1,149 @@
+<div class="w-full max-w-7xl mx-auto">
+  <div class="mb-6 sm:mb-8">
+    <h1 class="text-xl sm:text-2xl font-semibold text-gray-800">Leave Management</h1>
+    <p class="mt-1 text-sm text-gray-600">Submit and manage leave requests</p>
+  </div>
+
+  <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 text-red-700 px-3 py-3 sm:px-4 rounded-r-lg mb-4 text-sm" role="alert">
+    {{error}}
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+    <!-- Request Leave Form -->
+    <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-4 sm:p-6">
+      <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Request New Leave</h2>
+      <form [formGroup]="leaveForm" (ngSubmit)="requestLeave()" class="space-y-4">
+        <div>
+          <label for="startDate" class="block text-sm font-medium text-gray-700">Start Date</label>
+          <input type="date" id="startDate" formControlName="startDate"
+                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          <div *ngIf="leaveForm.controls['startDate'].invalid && leaveForm.controls['startDate'].touched" class="text-red-500 text-xs mt-1">
+            Start Date is required.
+          </div>
+        </div>
+        <div>
+          <label for="endDate" class="block text-sm font-medium text-gray-700">End Date</label>
+          <input type="date" id="endDate" formControlName="endDate"
+                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          <div *ngIf="leaveForm.controls['endDate'].invalid && leaveForm.controls['endDate'].touched" class="text-red-500 text-xs mt-1">
+            End Date is required.
+          </div>
+        </div>
+        <div>
+          <label for="leaveType" class="block text-sm font-medium text-gray-700">Leave Type</label>
+          <select id="leaveType" formControlName="leaveType"
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <option value="ANNUAL">Annual Leave</option>
+            <option value="SICK">Sick Leave</option>
+            <option value="CASUAL">Casual Leave</option>
+            <option value="MATERNITY">Maternity Leave</option>
+            <option value="PATERNITY">Paternity Leave</option>
+            <option value="UNPAID">Unpaid Leave</option>
+          </select>
+          <div *ngIf="leaveForm.controls['leaveType'].invalid && leaveForm.controls['leaveType'].touched" class="text-red-500 text-xs mt-1">
+            Leave Type is required.
+          </div>
+        </div>
+        <div>
+          <label for="reason" class="block text-sm font-medium text-gray-700">Reason</label>
+          <textarea id="reason" formControlName="reason" rows="3"
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+          <div *ngIf="leaveForm.controls['reason'].invalid && leaveForm.controls['reason'].touched" class="text-red-500 text-xs mt-1">
+            Reason is required.
+          </div>
+        </div>
+        <div>
+          <button type="submit" [disabled]="leaveForm.invalid || loading"
+                  class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <span *ngIf="!loading">Request Leave</span>
+            <span *ngIf="loading" class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Submitting...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="space-y-6 sm:space-y-8">
+      <!-- My Leave Requests -->
+      <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-4 sm:p-6">
+        <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">My Leave Requests</h2>
+        <div *ngIf="myLeaveRequests.length === 0" class="text-gray-600 text-sm">No leave requests found.</div>
+        <div *ngIf="myLeaveRequests.length > 0" class="overflow-x-auto -mx-2 sm:mx-0 rounded-lg border border-gray-200">
+          <table class="min-w-full leading-normal text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
+                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">From</th>
+                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">To</th>
+                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden md:table-cell">Reason</th>
+                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let leave of myLeaveRequests" class="border-b border-gray-200 last:border-0">
+                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-900">{{ leave.leaveType }}</td>
+                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700">{{ leave.startDate | date }}</td>
+                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700">{{ leave.endDate | date }}</td>
+                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700 hidden md:table-cell max-w-[120px] truncate" title="{{ leave.reason }}">{{ leave.reason }}</td>
+                <td class="px-3 py-3 sm:px-4 sm:py-4">
+                  <span class="relative inline-block px-3 py-1 font-semibold leading-tight"
+                        [ngClass]="{
+                          'text-green-900': leave.status === 'APPROVED',
+                          'text-red-900': leave.status === 'REJECTED',
+                          'text-yellow-900': leave.status === 'PENDING'
+                        }">
+                    <span aria-hidden class="absolute inset-0 opacity-50 rounded-full"
+                          [ngClass]="{
+                            'bg-green-200': leave.status === 'APPROVED',
+                            'bg-red-200': leave.status === 'REJECTED',
+                            'bg-yellow-200': leave.status === 'PENDING'
+                          }"></span>
+                    <span class="relative">{{ leave.status }}</span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pending Leave Requests (for Managers/Admins) -->
+      <div *ngIf="isManager" class="bg-white shadow-sm rounded-xl border border-gray-200 p-4 sm:p-6">
+        <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Pending Leave Requests for Approval</h2>
+        <div *ngIf="pendingRequests.length === 0" class="text-gray-600 text-sm">No pending leave requests.</div>
+        <div *ngIf="pendingRequests.length > 0" class="overflow-x-auto -mx-2 sm:mx-0 rounded-lg border border-gray-200">
+          <table class="min-w-full leading-normal text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Employee</th>
+                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
+                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">From</th>
+                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">To</th>
+                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let request of pendingRequests" class="border-b border-gray-200 last:border-0">
+                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-900">{{ request.employeeId }}</td>
+                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700">{{ request.leaveType }}</td>
+                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700 hidden sm:table-cell">{{ request.startDate | date }}</td>
+                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700 hidden sm:table-cell">{{ request.endDate | date }}</td>
+                <td class="px-3 py-3 sm:px-4 sm:py-4">
+                  <div class="flex flex-wrap gap-2">
+                    <button (click)="approve(request.id)" class="text-green-600 hover:text-green-800 font-medium text-xs sm:text-sm">Approve</button>
+                    <button (click)="reject(request.id)" class="text-red-600 hover:text-red-800 font-medium text-xs sm:text-sm">Reject</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

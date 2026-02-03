@@ -1,0 +1,72 @@
+<div class="w-full max-w-7xl mx-auto">
+  <div class="mb-6 sm:mb-8">
+    <h1 class="text-xl sm:text-2xl font-semibold text-gray-800">Overtime</h1>
+    <p class="mt-1 text-sm text-gray-600">Submit and manage overtime requests</p>
+  </div>
+
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-4 sm:p-6 mb-6">
+    <h2 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">Request Overtime</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div>
+        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+        <input formControlName="date" type="date"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base">
+      </div>
+      <div>
+        <label for="hours" class="block text-sm font-medium text-gray-700 mb-1">Hours</label>
+        <input formControlName="hours" type="number" step="0.5"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base">
+      </div>
+      <div class="sm:col-span-2 lg:col-span-1">
+        <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+        <input formControlName="reason" type="text" placeholder="Reason"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base">
+      </div>
+      <div class="sm:col-span-2 lg:col-span-3">
+        <button type="submit"
+          class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors">
+          Request Overtime
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-4 sm:p-6">
+      <h2 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">My Requests</h2>
+      <ul class="divide-y divide-gray-200">
+        <li *ngFor="let r of myRequests" class="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between gap-2">
+          <div class="min-w-0">
+            <div class="text-sm sm:text-base font-medium text-gray-900">{{r.date}} — {{r.hours}} hrs</div>
+            <div class="text-xs sm:text-sm text-gray-600 truncate">{{r.reason}}</div>
+          </div>
+          <div class="text-sm font-medium text-gray-700 flex-shrink-0">{{r.status}}</div>
+        </li>
+      </ul>
+      <p *ngIf="myRequests.length === 0" class="text-sm text-gray-500">No overtime requests yet.</p>
+    </div>
+
+    <div *ngIf="isManager" class="bg-white shadow-sm rounded-xl border border-gray-200 p-4 sm:p-6">
+      <h2 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">Pending Requests</h2>
+      <ul class="divide-y divide-gray-200 space-y-3">
+        <li *ngFor="let p of pendingRequests" class="py-3 sm:py-4">
+          <div class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
+            <div class="min-w-0 flex-1">
+              <div class="text-sm sm:text-base font-medium text-gray-900">{{p.employeeName}} — {{p.date}} — {{p.hours}} hrs</div>
+              <div class="text-xs sm:text-sm text-gray-600 truncate">{{p.reason}}</div>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+              <button (click)="approve(p.id)" class="px-3 py-1.5 sm:py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors">
+                Approve
+              </button>
+              <button (click)="reject(p.id)" class="px-3 py-1.5 sm:py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors">
+                Reject
+              </button>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <p *ngIf="pendingRequests.length === 0" class="text-sm text-gray-500">No pending requests.</p>
+    </div>
+  </div>
+</div>

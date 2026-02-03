@@ -1,59 +1,107 @@
-# Frontend
+# HRMS Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.3.
+This project is a frontend-only Human Resources Management System (HRMS) admin dashboard built with Angular and styled using Tailwind CSS. It is designed to consume RESTful APIs for managing employees, attendance, leave requests, and overtime requests.
 
-## Development server
+## Features
 
-To start a local development server, run:
+-   **Authentication**: Login functionality with JWT-based authentication.
+-   **Role-based Access Control**: Routes are protected using authentication and role-based guards (e.g., admin access for employee management).
+-   **Core Layout**: Responsive layout with a sidebar navigation and a top header for authenticated users.
+-   **Dashboard**: Overview dashboard with summary statistics.
+-   **Employee Management**: Functionality to list, add, edit, and delete employee records (Admin access required).
+-   **Attendance Management**: Check-in/check-out system and attendance reports.
+-   **Leave Management**: Submit leave requests, view personal leave history, and approve/reject pending requests (Admin/Manager access for approvals).
+-   **Overtime Management**: Submit overtime requests, view personal overtime history, and approve/reject pending requests (Admin/Manager access for approvals).
+
+## Assumptions
+
+-   A backend API server is running and accessible at `http://localhost:8080/api/`.
+-   The backend uses JWT (JSON Web Tokens) for authentication.
+-   RESTful endpoints are available as specified in the `HRMS_Postman_Collection.json`.
+
+## Setup Instructions
+
+Follow these steps to set up and run the HRMS frontend application locally.
+
+### 1. Prerequisites
+
+Ensure you have the following installed:
+
+-   Node.js (LTS version recommended)
+-   npm (comes with Node.js) or Yarn
+-   Angular CLI (`npm install -g @angular/cli`)
+
+### 2. Install Dependencies
+
+Navigate to the project directory and install the required Node.js packages:
+
+```bash
+cd hrms_frontend
+npm install
+# or
+# yarn install
+```
+
+### 3. Backend API URL Configuration
+
+The application expects the backend API to be available at `http://localhost:8080/api/`. This can be configured in the environment files:
+
+-   `src/environments/environment.ts` (for development)
+-   `src/environments/environment.prod.ts` (for production)
+
+The `apiUrl` variable in these files should point to your backend's base URL.
+
+```typescript
+// src/environments/environment.ts
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:8080/api' // Adjust if your backend is on a different URL/port
+};
+```
+
+### 4. Development Server
+
+Run the application in development mode:
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Open your browser and navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
-## Code scaffolding
+### 5. Build for Production
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+To build the project for production, use:
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The build artifacts will be stored in the `dist/` directory.
 
-## Running unit tests
+## Usage
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+### Login
 
-```bash
-ng test
-```
+Use the login page (`http://localhost:4200/login`) to authenticate.
 
-## Running end-to-end tests
+**Example Credentials (if using a default backend setup):**
 
-For end-to-end (e2e) testing, run:
+-   **Admin**: `username: admin`, `password: password` (or as configured in your backend)
+-   **Employee**: `username: johndoe`, `password: password` (or as configured in your backend)
 
-```bash
-ng e2e
-```
+After successful login, you will be redirected to the dashboard.
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### Navigation
 
-## Additional Resources
+Use the sidebar to navigate through different sections of the HRMS dashboard:
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+-   **Dashboard**: Overview of key HR metrics.
+-   **Employees**: Manage employee records (Admin only).
+-   **Attendance**: Mark daily attendance and view reports.
+-   **Leave Requests**: Submit and manage leave applications.
+-   **Overtime Requests**: Submit and manage overtime requests.
+
+### Logout
+
+Click the "Logout" button in the header to end your session.

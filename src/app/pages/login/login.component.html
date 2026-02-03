@@ -1,0 +1,60 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
+  <div class="w-full max-w-md space-y-6 sm:space-y-8 p-6 sm:p-8 md:p-10 bg-white rounded-xl shadow-lg mx-2">
+    <div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 text-center">
+        Sign in to your account
+      </h2>
+    </div>
+    <form class="space-y-5 sm:space-y-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="rounded-lg shadow-sm -space-y-px">
+        <div>
+          <label for="username" class="sr-only">Username</label>
+          <input id="username" name="username" type="text" autocomplete="username" required
+            formControlName="username"
+            class="appearance-none rounded-t-lg relative block w-full px-3 py-3 sm:py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 text-base sm:text-sm"
+            placeholder="Username">
+        </div>
+        <div>
+          <label for="password" class="sr-only">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required
+            formControlName="password"
+            class="appearance-none rounded-b-lg relative block w-full px-3 py-3 sm:py-2.5 border border-t-0 border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 text-base sm:text-sm"
+            placeholder="Password">
+        </div>
+      </div>
+
+      <div *ngIf="loginForm.controls['username'].invalid && (loginForm.controls['username'].dirty || loginForm.controls['username'].touched)"
+        class="text-red-500 text-xs sm:text-sm">
+        Username is required.
+      </div>
+      <div *ngIf="loginForm.controls['password'].invalid && (loginForm.controls['password'].dirty || loginForm.controls['password'].touched)"
+        class="text-red-500 text-xs sm:text-sm">
+        Password is required.
+      </div>
+
+      <div class="flex items-center justify-between text-sm">
+        <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
+          Forgot your password?
+        </a>
+      </div>
+
+      <div>
+        <button type="submit" [disabled]="loading"
+          class="group relative w-full flex justify-center py-3 sm:py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
+          <span *ngIf="!loading">Sign in</span>
+          <span *ngIf="loading" class="flex items-center">
+            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Signing in...
+          </span>
+        </button>
+      </div>
+
+      <div *ngIf="error" class="text-red-600 text-center text-sm">
+        {{ error }}
+      </div>
+    </form>
+  </div>
+</div>
