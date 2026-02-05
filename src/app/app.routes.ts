@@ -4,6 +4,7 @@ import { LayoutComponent } from './shared/layout/layout.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { menuGuard } from './core/guards/menu.guard';
 
 export const routes: Routes = [
     {
@@ -13,7 +14,7 @@ export const routes: Routes = [
     {
         path: '',
         component: LayoutComponent,
-        canActivate: [authGuard],
+        canActivate: [authGuard, menuGuard],
         children: [
             {
                 path: '',
@@ -49,6 +50,18 @@ export const routes: Routes = [
             {
                 path: 'overtime',
                 loadComponent: () => import('./pages/overtime/overtime.component').then(m => m.OvertimeComponent),
+            },
+            {
+                path: 'admin/holidays',
+                canActivate: [roleGuard],
+                data: { expectedRoles: ['ADMIN'] },
+                loadComponent: () => import('./pages/holiday/holiday-list.component').then(m => m.HolidayListComponent),
+            },
+            {
+                path: 'departments',
+                canActivate: [roleGuard],
+                data: { expectedRoles: ['ADMIN'] },
+                loadComponent: () => import('./pages/department/department-list.component').then(m => m.DepartmentListComponent),
             }
         ]
     },

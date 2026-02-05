@@ -1,155 +1,114 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { Router } from '@angular/router';
-import { Observable, from, throwError } from 'rxjs';
-import { switchMap, catchError } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { AuthService } from './auth.service';
-
-export interface RequestConfig {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  body?: any;
-  headers?: Record<string, string>;
-  params?: Record<string, string | number | boolean>;
-  skipAuth?: boolean;
-}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
   private baseUrl = environment.apiUrl;
-  private isRefreshing = false;
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  constructor(private http: HttpClient) {}
 
   get<T>(path: string, params?: Record<string, string | number | boolean>): Observable<T> {
-    return this.request<T>(path, { method: 'GET', params });
+    const url = this.buildUrl(path);
+    const httpParams = this.buildParams(params);
+    return this.http
+      .get<T>(url, { params: httpParams, responseType: 'json' })
+      .pipe(
+        map((body) => this.unwrap<T>(body)),
+        catchError((err) => throwError(() => this.normalizeError(err)))
+      );
   }
 
-  post<T>(path: string, body?: any): Observable<T> {
-    return this.request<T>(path, { method: 'POST', body });
+  post<T>(path: string, body?: unknown): Observable<T> {
+    const url = this.buildUrl(path);
+    return this.http.post<T>(url, body ?? {}).pipe(
+      map((res) => this.unwrap<T>(res)),
+      catchError((err) => throwError(() => this.normalizeError(err)))
+    );
   }
 
-  put<T>(path: string, body?: any): Observable<T> {
-    return this.request<T>(path, { method: 'PUT', body });
+  put<T>(path: string, body?: unknown): Observable<T> {
+    const url = this.buildUrl(path);
+    return this.http.put<T>(url, body ?? {}).pipe(
+      map((res) => this.unwrap<T>(res)),
+      catchError((err) => throwError(() => this.normalizeError(err)))
+    );
   }
 
   delete<T>(path: string): Observable<T> {
-    return this.request<T>(path, { method: 'DELETE' });
+    const url = this.buildUrl(path);
+    return this.http.delete<T>(url).pipe(
+      map((res) => this.unwrap<T>(res)),
+      catchError((err) => throwError(() => this.normalizeError(err)))
+    );
   }
 
-  patch<T>(path: string, body?: any): Observable<T> {
-    return this.request<T>(path, { method: 'PATCH', body });
+  patch<T>(path: string, body?: unknown): Observable<T> {
+    const url = this.buildUrl(path);
+    return this.http.patch<T>(url, body ?? {}).pipe(
+      map((res) => this.unwrap<T>(res)),
+      catchError((err) => throwError(() => this.normalizeError(err)))
+    );
   }
 
-  private buildUrl(path: string, params?: Record<string, string | number | boolean>): string {
-    const url = new URL(path.startsWith('http') ? path : `${this.baseUrl}/${path.replace(/^\//, '')}`);
+  private buildUrl(path: string): string {
+    if (path.startsWith('http')) return path;
+    const clean = path.replace(/^\//, '');
+    return `${this.baseUrl}/${clean}`;
+  }
+
+  private buildParams(params?: Record<string, string | number | boolean>): HttpParams {
+    let httpParams = new HttpParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          url.searchParams.append(key, String(value));
+          httpParams = httpParams.set(key, String(value));
         }
       });
     }
-    return url.toString();
+    return httpParams;
   }
 
-  private async fetchWithRetry(
-    url: string,
-    config: RequestConfig,
-    isRetry = false
-  ): Promise<Response> {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...config.headers
-    };
-
-    if (!config.skipAuth) {
-      const user = this.authService.currentUserValue;
-      if (user?.token) {
-        headers['Authorization'] = `Bearer ${user.token}`;
-      }
+  private unwrap<T>(body: unknown): T {
+    if (body == null) return body as T;
+    const b = body as Record<string, unknown>;
+    if (b['returnCode'] !== undefined && b['returnMessage'] !== undefined) {
+      if (b['returnCode'] === '200') return (b['data'] ?? body) as T;
+      throw {
+        status: 0,
+        message: (b['returnMessage'] as string) || `API Error: ${b['returnCode']}`,
+        returnMessage: b['returnMessage']
+      };
     }
-
-    const fetchOptions: RequestInit = {
-      method: config.method || 'GET',
-      headers,
-      credentials: 'omit'
-    };
-
-    if (config.body && config.method !== 'GET') {
-      fetchOptions.body = JSON.stringify(config.body);
-    }
-
-    const response = await fetch(url, fetchOptions);
-
-    if (response.status === 401 && !isRetry && !config.skipAuth) {
-      if (!this.isRefreshing && isPlatformBrowser(this.platformId)) {
-        this.isRefreshing = true;
-        try {
-          await this.authService.refreshTokenPromise();
-          return this.fetchWithRetry(url, config, true);
-        } catch {
-          this.authService.logout();
-          this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
-        } finally {
-          this.isRefreshing = false;
-        }
-      }
-    }
-
-    return response;
+    return body as T;
   }
 
-  private request<T>(path: string, config: RequestConfig = {}): Observable<T> {
-    const url = this.buildUrl(path, config.params);
-
-    return from(this.fetchWithRetry(url, config)).pipe(
-      switchMap(async (response) => {
-        const text = await response.text();
-        let responseBody: any = null;
-
-        try {
-          responseBody = text ? JSON.parse(text) : null;
-        } catch (e) {
-          // If parsing fails, treat text as raw response or empty
-          responseBody = null;
-        }
-
-
-        if (!response.ok) {
-          // Handle HTTP errors (e.g., 404, 500)
-          let errorMessage = `HTTP ${response.status}`;
-          if (responseBody && responseBody.returnMessage) {
-            errorMessage = responseBody.returnMessage;
-          } else if (responseBody && (responseBody.message || responseBody.error)) {
-            errorMessage = responseBody.message || responseBody.error;
-          } else if (text) {
-            errorMessage = text;
-          }
-          throw { status: response.status, message: errorMessage };
-        }
-
-        // Handle successful HTTP responses (2xx)
-        // Check for the new response format (returnCode, returnMessage, data)
-        if (responseBody && responseBody.returnCode && responseBody.returnMessage) {
-          if (responseBody.returnCode === '200') {
-            return responseBody.data;
-          } else {
-            // This case handles API-specific errors even if HTTP status is 200 (e.g., business logic errors)
-            throw { status: response.status, message: responseBody.returnMessage || `API Error: ${responseBody.returnCode}` };
-          }
-        }
-
-        // If not in the new structured format, return the whole body as before
-        return responseBody;
-      }),
-      catchError((err) => throwError(() => err))
-    ) as Observable<T>;
+  private normalizeError(err: unknown): {
+    status?: number;
+    message?: string;
+    returnMessage?: string;
+    data?: unknown;
+  } {
+    if (err && typeof err === 'object') {
+      const e = err as Record<string, unknown>;
+      const body = e['error'];
+      const bodyObj = body && typeof body === 'object' ? (body as Record<string, unknown>) : null;
+      const message =
+        (bodyObj?.['returnMessage'] as string) ??
+        (e['message'] as string) ??
+        (bodyObj?.['message'] as string) ??
+        'Request failed';
+      return {
+        status: e['status'] as number,
+        message,
+        returnMessage: bodyObj?.['returnMessage'] as string,
+        data: bodyObj?.['data']
+      };
+    }
+    return { message: 'Request failed' };
   }
 }

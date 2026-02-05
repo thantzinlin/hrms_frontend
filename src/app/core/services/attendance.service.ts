@@ -17,7 +17,7 @@ export class AttendanceService {
   }
 
   getAttendanceByEmployeeAndDateRange(
-    employeeId: number,
+    employeeId: String,
     startDate: string,
     endDate: string
   ): Observable<any> {

@@ -1,0 +1,10 @@
+.menu-group .children {
+  border-left: 1px solid theme('colors.gray.700');
+  margin-left: 1.25rem;
+}
+
+.menu-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

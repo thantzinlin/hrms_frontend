@@ -1,6 +1,7 @@
-import { Component, OnInit, Injectable } from '@angular/core'; // Add Injectable
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common'; // Import CommonModule
+import { CommonModule } from '@angular/common';
+import { finalize } from 'rxjs/operators';
 import { AttendanceService } from '../../core/services/attendance.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Attendance } from '../../models/attendance.model';
@@ -37,63 +38,53 @@ export class AttendanceComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.authService.currentUserValue;
-    this.attendanceForm = this.formBuilder.group({
-      // Assuming the logged in user will checkin/out
-    });
-    this.reportForm = this.formBuilder.group({
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required]
-    });
     this.getTodayAttendance();
   }
 
   getTodayAttendance(): void {
-    if (this.currentUser && this.currentUser.id) { // Ensure currentUser and id exist
-      const today = new Date().toISOString().split('T')[0];
-      this.attendanceService.getAttendanceByEmployeeAndDateRange(this.currentUser.id, today, today)
-        .subscribe((data: Attendance[]) => { // Add type for data
-          this.attendanceToday = data;
-        }, (error: any) => { // Add type for error
-          this.error = error.message;
-        });
-    }
+    if (!this.currentUser?.id) return;
+    const today = new Date().toISOString().split('T')[0];
+    this.attendanceService
+      .getAttendanceByEmployeeAndDateRange(this.currentUser.employeeId, today, today)
+      .subscribe({
+        next: (data) => (this.attendanceToday = Array.isArray(data) ? data : []),
+        error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Failed to load.')
+      });
   }
 
   checkIn(): void {
-    if (this.currentUser && this.currentUser.id) { // Ensure currentUser and id exist
-      this.loading = true;
-      this.attendanceService.checkIn(this.currentUser.id).subscribe(() => {
-        this.getTodayAttendance();
-        this.loading = false;
-      }, (error: any) => { // Add type for error
-        this.error = error.message;
-        this.loading = false;
+    if (!this.currentUser?.id) return;
+    this.loading = true;
+    this.attendanceService
+      .checkIn(this.currentUser.id)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: () => this.getTodayAttendance(),
+        error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Check-in failed.')
       });
-    }
   }
 
   checkOut(): void {
-    const attendance = this.attendanceToday.find(a => !a.checkOutTime);
-    if (attendance && attendance.id) { // Ensure attendance and id exist
-      this.loading = true;
-      this.attendanceService.checkOut(attendance.id).subscribe(() => {
-        this.getTodayAttendance();
-        this.loading = false;
-      }, (error: any) => { // Add type for error
-        this.error = error.message;
-        this.loading = false;
+    const attendance = this.attendanceToday.find((a) => !a.checkOutTime);
+    if (!attendance?.id) return;
+    this.loading = true;
+    this.attendanceService
+      .checkOut(attendance.id)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: () => this.getTodayAttendance(),
+        error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Check-out failed.')
       });
-    }
   }
 
   getReport(): void {
-    if (this.reportForm.invalid || !this.currentUser || !this.currentUser.id) { // Ensure currentUser and id exist
-      return;
-    }
+    if (this.reportForm.invalid || !this.currentUser?.id) return;
     const { startDate, endDate } = this.reportForm.value;
-    this.attendanceService.getAttendanceByEmployeeAndDateRange(this.currentUser.id, startDate, endDate)
-      .subscribe((data: Attendance[]) => { // Add type for data
-        this.reportData = data;
+    this.attendanceService
+      .getAttendanceByEmployeeAndDateRange(this.currentUser.employeeId, startDate, endDate)
+      .subscribe({
+        next: (data) => (this.reportData = Array.isArray(data) ? data : []),
+        error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Report failed.')
       });
   }
 }

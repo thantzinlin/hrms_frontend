@@ -379,6 +379,293 @@
             ]
         },
         {
+            "name": "Admin - Roles",
+            "item": [
+                {
+                    "name": "Create Role",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {"key": "Authorization", "value": "Bearer <access_token>"},
+                            {"key": "Content-Type", "value": "application/json"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"roleName\": \"HR_MANAGER\",\n    \"description\": \"HR Manager role\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/roles",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "roles"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Roles",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Authorization", "value": "Bearer <access_token>"}],
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/roles",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "roles"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Role By ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Authorization", "value": "Bearer <access_token>"}],
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/roles/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "roles", "1"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Role",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {"key": "Authorization", "value": "Bearer <access_token>"},
+                            {"key": "Content-Type", "value": "application/json"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"roleName\": \"HR_MANAGER\",\n    \"description\": \"Updated HR Manager role\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/roles/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "roles", "1"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Role",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [{"key": "Authorization", "value": "Bearer <access_token>"}],
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/roles/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "roles", "1"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Admin - Role-Menu Mapping",
+            "item": [
+                {
+                    "name": "Assign Menus to Role",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {"key": "Authorization", "value": "Bearer <access_token>"},
+                            {"key": "Content-Type", "value": "application/json"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"menuIds\": [1, 2, 3, 4, 5]\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/roles/1/menus",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "roles", "1", "menus"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Menus by Role ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Authorization", "value": "Bearer <access_token>"}],
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/roles/1/menus",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "roles", "1", "menus"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Admin - Menus",
+            "item": [
+                {
+                    "name": "Create Menu",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {"key": "Authorization", "value": "Bearer <access_token>"},
+                            {"key": "Content-Type", "value": "application/json"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"menuName\": \"Reports\",\n    \"moduleCode\": \"HRMS\",\n    \"parentId\": null,\n    \"url\": \"/reports\",\n    \"icon\": \"bar-chart\",\n    \"sequence\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/menus",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "menus"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Sub-Menu",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {"key": "Authorization", "value": "Bearer <access_token>"},
+                            {"key": "Content-Type", "value": "application/json"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"menuName\": \"Salary Report\",\n    \"moduleCode\": \"HRMS\",\n    \"parentId\": 6,\n    \"url\": \"/reports/salary\",\n    \"icon\": \"dollar-sign\",\n    \"sequence\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/menus",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "menus"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Menus (Tree)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Authorization", "value": "Bearer <access_token>"}],
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/menus",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "menus"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Menus (Flat)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Authorization", "value": "Bearer <access_token>"}],
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/menus/flat",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "menus", "flat"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Menu By ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Authorization", "value": "Bearer <access_token>"}],
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/menus/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "menus", "1"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Menu",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {"key": "Authorization", "value": "Bearer <access_token>"},
+                            {"key": "Content-Type", "value": "application/json"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"menuName\": \"Updated Reports\",\n    \"moduleCode\": \"HRMS\",\n    \"parentId\": null,\n    \"url\": \"/reports\",\n    \"icon\": \"bar-chart\",\n    \"sequence\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/menus/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "menus", "1"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Menu",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [{"key": "Authorization", "value": "Bearer <access_token>"}],
+                        "url": {
+                            "raw": "http://localhost:8080/api/admin/menus/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "admin", "menus", "1"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Menus",
+            "item": [
+                {
+                    "name": "Get Menus by User Roles",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Authorization", "value": "Bearer <access_token>"}],
+                        "url": {
+                            "raw": "http://localhost:8080/api/menus",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8080",
+                            "path": ["api", "menus"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Attendance",
             "item": [
                 {

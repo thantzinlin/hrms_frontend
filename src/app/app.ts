@@ -1,11 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common'; // Import CommonModule
+import { CommonModule } from '@angular/common';
+import { MessageDialogComponent } from './shared/message-dialog/message-dialog.component';
 
 @Component({
   selector: 'app-root',
-  standalone: true, // Mark as standalone
-  imports: [RouterOutlet, CommonModule], // Add CommonModule
+  standalone: true,
+  imports: [RouterOutlet, CommonModule, MessageDialogComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

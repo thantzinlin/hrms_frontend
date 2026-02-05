@@ -79,6 +79,14 @@ export class EmployeeFormComponent implements OnInit {
 
   get f() { return this.employeeForm.controls; }
 
+  /** Format joinDate for backend: "YYYY-MM-DD" or "YYYY-MM-DDTHH:mm:ss" -> "YYYY-MM-DDTHH:mm:ss" */
+  private formatJoinDateForApi(value: string): string {
+    if (!value) return value;
+    const trimmed = String(value).trim();
+    if (trimmed.includes('T')) return trimmed;
+    return `${trimmed}T09:00:00`;
+  }
+
   onSubmit(): void {
     this.submitted = true;
 
@@ -87,7 +95,8 @@ export class EmployeeFormComponent implements OnInit {
       return;
     }
 
-    const employeeData = this.employeeForm.value;
+    const raw = this.employeeForm.value;
+    const employeeData = { ...raw, joinDate: this.formatJoinDateForApi(raw.joinDate) };
     if (this.isEditMode && this.employeeForm.get('password')?.disabled) {
       delete employeeData.password;
     }

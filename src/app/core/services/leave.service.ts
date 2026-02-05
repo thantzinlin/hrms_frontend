@@ -24,11 +24,15 @@ export class LeaveService {
     return this.api.put(`leaves/${id}/status`, { status });
   }
 
-  getByEmployee(employeeId: number): Observable<any> {
+  getByEmployee(employeeId: String): Observable<any> {
     return this.api.get<any>(`leaves/employee/${employeeId}`);
   }
 
   getPending(): Observable<any> {
     return this.api.get<any>('leaves/pending');
+  }
+
+  calculateLeaveDays(id: number): Observable<any> {
+    return this.api.get<any>(`leaves/${id}/calculate-days`);
   }
 }

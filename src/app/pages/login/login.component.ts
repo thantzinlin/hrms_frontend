@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { finalize } from 'rxjs/operators';
 
 import { AuthService } from '../../core/services/auth.service';
 
@@ -23,7 +24,8 @@ export class LoginComponent implements OnInit {
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private authenticationService: AuthService
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -32,8 +34,7 @@ export class LoginComponent implements OnInit {
       password: ['', Validators.required]
     });
 
-    // redirect to home if already logged in
-    if (this.authenticationService.currentUserValue) {
+    if (this.authService.currentUserValue) {
       this.router.navigate(['/']);
     }
 
@@ -46,26 +47,27 @@ export class LoginComponent implements OnInit {
 
   onSubmit(): void {
     this.submitted = true;
-
-    if (this.loginForm.invalid) {
-      return;
-    }
+    if (this.loginForm.invalid) return;
 
     this.loading = true;
     this.error = '';
 
-    this.authenticationService
+    this.authService
       .login(this.f['username'].value, this.f['password'].value)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        })
+      )
       .subscribe({
-        next: () => {
-          this.loading = false;
-          this.router.navigate([this.returnUrl]);
-        },
-        error: (err) => {
-          this.loading = false;
+        next: () => this.router.navigate([this.returnUrl]),
+        error: (err: { message?: string; returnMessage?: string }) => {
           this.error =
-            err?.message ||
+            err?.returnMessage ??
+            err?.message ??
             'Login failed. Please check your username and password.';
+          this.cdr.detectChanges();
         }
       });
   }

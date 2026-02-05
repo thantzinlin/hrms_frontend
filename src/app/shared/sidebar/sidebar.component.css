@@ -1,1 +1,4 @@
-/* Add any custom styles for the sidebar component here */
+/* Sidebar: responsive, scrollable nav */
+aside nav {
+  -webkit-overflow-scrolling: touch;
+}

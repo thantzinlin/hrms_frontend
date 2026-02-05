@@ -1,0 +1,55 @@
+@if (hasChildren) {
+  <!-- Parent: expandable, no navigation when url is null -->
+  <div class="menu-group">
+    <button
+      type="button"
+      (click)="toggle()"
+      [class.bg-gray-700]="expanded()"
+      [class.bg-transparent]="!expanded()"
+      class="flex w-full items-center rounded-lg px-4 py-3 text-left text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+      [style.padding-left.rem]="1 + depth * 0.75">
+      <span class="menu-icon mr-3 flex h-5 w-5 flex-shrink-0">
+        <app-menu-icon [icon]="item.icon"></app-menu-icon>
+      </span>
+      <span class="flex-1 font-medium">{{ item.menuName }}</span>
+      <svg
+        class="h-4 w-4 flex-shrink-0 transition-transform"
+        [class.rotate-180]="expanded()"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+    @if (expanded()) {
+      <div class="children pl-0">
+        @for (child of item.children; track child.menuId) {
+          <app-menu-item [item]="child" [depth]="depth + 1"></app-menu-item>
+        }
+      </div>
+    }
+  </div>
+} @else if (linkUrl !== null) {
+  <!-- Leaf with URL: direct link -->
+  <a
+    [routerLink]="linkUrl!"
+    routerLinkActive="bg-blue-600 text-white"
+    [routerLinkActiveOptions]="{ exact: linkUrl === '/' }"
+    class="flex items-center rounded-lg px-4 py-3 text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+    [style.padding-left.rem]="1 + depth * 0.75">
+    <span class="menu-icon mr-3 flex h-5 w-5 flex-shrink-0">
+      <app-menu-icon [icon]="item.icon"></app-menu-icon>
+    </span>
+    <span class="font-medium">{{ item.menuName }}</span>
+  </a>
+} @else {
+  <!-- Leaf without URL: display only -->
+  <div
+    class="flex cursor-default items-center rounded-lg px-4 py-3 text-gray-400"
+    [style.padding-left.rem]="1 + depth * 0.75">
+    <span class="menu-icon mr-3 flex h-5 w-5 flex-shrink-0">
+      <app-menu-icon [icon]="item.icon"></app-menu-icon>
+    </span>
+    <span class="font-medium">{{ item.menuName }}</span>
+  </div>
+}
