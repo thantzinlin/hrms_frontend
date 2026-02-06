@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { finalize } from 'rxjs/operators';
+import { finalize, timeout } from 'rxjs/operators';
 import { HolidayService } from '../../core/services/holiday.service';
 import { Holiday } from '../../models/holiday.model';
+import { MessageDialogService } from '../../core/services/message-dialog.service';
 
 @Component({
   selector: 'app-holiday-list',
@@ -23,7 +24,9 @@ export class HolidayListComponent implements OnInit {
 
   constructor(
     private holidayService: HolidayService,
-    private fb: FormBuilder
+    private messageDialog: MessageDialogService,
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef
   ) {
     this.holidayForm = this.fb.group({
       name: ['', Validators.required],
@@ -40,10 +43,25 @@ export class HolidayListComponent implements OnInit {
     this.error = '';
     this.holidayService
       .getAll()
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(
+        timeout(15000),
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        })
+      )
       .subscribe({
-        next: (data) => (this.holidays = Array.isArray(data) ? data : []),
-        error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Failed to load holidays.')
+        next: (data) => {
+          this.holidays = Array.isArray(data) ? data : [];
+          this.error = '';
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.error = err?.message ?? err?.returnMessage ?? 'Failed to load holidays.';
+          this.holidays = [];
+          this.messageDialog.showApiError(err);
+          this.cdr.detectChanges();
+        }
       });
   }
 
@@ -84,7 +102,10 @@ export class HolidayListComponent implements OnInit {
           this.loadHolidays();
           this.cancelForm();
         },
-        error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Save failed.')
+        error: (err) => {
+          this.error = err?.message ?? err?.returnMessage ?? 'Save failed.';
+          this.messageDialog.showApiError(err);
+        }
       });
   }
 
@@ -93,7 +114,10 @@ export class HolidayListComponent implements OnInit {
     if (!confirm(`Delete holiday "${holiday.name}"?`)) return;
     this.holidayService.delete(holiday.id).subscribe({
       next: () => this.loadHolidays(),
-      error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Delete failed.')
+      error: (err) => {
+        this.error = err?.message ?? err?.returnMessage ?? 'Delete failed.';
+        this.messageDialog.showApiError(err);
+      }
     });
   }
 

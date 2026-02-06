@@ -7,6 +7,8 @@ export interface Employee {
     joinDate: string;
     status: string;
     departmentId: number;
-    position: string;
+    departmentName?: string;
+    positionId?: number;
+    position?: string;
     role: string;
 }

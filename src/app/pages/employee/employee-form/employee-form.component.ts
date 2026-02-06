@@ -1,16 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router'; // Import RouterModule
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { Employee } from '../../../models/employee.model';
 import { DepartmentService } from '../../../core/services/department.service';
+import { PositionService } from '../../../core/services/position.service';
+import { RoleService } from '../../../core/services/role.service';
 import { Observable } from 'rxjs';
+import { map, finalize, timeout } from 'rxjs/operators';
 
 @Component({
   selector: 'app-employee-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule], // Add RouterModule
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './employee-form.component.html',
   styleUrls: ['./employee-form.component.css']
 })
@@ -21,14 +24,19 @@ export class EmployeeFormComponent implements OnInit {
   loading = false;
   error = '';
   departments$: Observable<any[]>;
-  submitted = false; // Add missing submitted property
+  positions$: Observable<{ positionId: number; positionName: string }[]>;
+  roles$: Observable<{ roleName: string; description?: string }[]>;
+  submitted = false;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private employeeService: EmployeeService,
-    private departmentService: DepartmentService
+    private departmentService: DepartmentService,
+    private positionService: PositionService,
+    private roleService: RoleService,
+    private cdr: ChangeDetectorRef
   ) {
     this.employeeForm = this.fb.group({
       employeeId: [''],
@@ -39,12 +47,24 @@ export class EmployeeFormComponent implements OnInit {
       status: ['Active', Validators.required],
       username: ['', Validators.required],
       password: ['', Validators.required],
-      departmentId: ['', Validators.required],
-      position: ['', Validators.required],
-      role: ['EMPLOYEE', Validators.required]
+      departmentId: [null as number | null, Validators.required],
+      positionId: [null as number | null, Validators.required],
+      role: ['', Validators.required]
     });
 
     this.departments$ = this.departmentService.getAllDepartments();
+    this.roles$ = this.roleService.getAll().pipe(
+      map((list) => (Array.isArray(list) ? list : []).map((r) => ({
+        roleName: r.roleName ?? (r as { roleName?: string }).roleName ?? '',
+        description: r.description
+      })).filter((r) => r.roleName))
+    );
+    this.positions$ = this.positionService.getAll().pipe(
+      map((list) => (Array.isArray(list) ? list : []).map((p) => ({
+        positionId: p.positionId ?? (p as { id?: number }).id ?? 0,
+        positionName: p.positionName ?? (p as { positionName?: string }).positionName ?? ''
+      })).filter((p) => p.positionId != null))
+    );
   }
 
   ngOnInit(): void {
@@ -53,23 +73,41 @@ export class EmployeeFormComponent implements OnInit {
       if (this.employeeId) {
         this.isEditMode = true;
         this.loading = true;
+        this.error = '';
         this.employeeForm.get('password')?.disable();
         this.employeeForm.get('username')?.disable();
-        this.employeeService.get(this.employeeId).subscribe(
-          (employee: Employee) => {
-            // Do not destructure password, as it's not in the Employee model for security
-            const employeeData = employee; // Use employee directly or pick desired fields
-            this.employeeForm.patchValue({
-              ...employeeData,
-              joinDate: employeeData.joinDate ? new Date(employeeData.joinDate).toISOString().split('T')[0] : ''
-            });
-            this.loading = false;
-          },
-          (error: any) => { // Add type for error
-            this.error = 'Failed to load employee data.';
-            this.loading = false;
-          }
-        );
+        this.employeeService
+          .get(this.employeeId)
+          .pipe(
+            timeout(15000),
+            finalize(() => {
+              this.loading = false;
+              this.cdr.detectChanges();
+            })
+          )
+          .subscribe({
+            next: (employee: Employee) => {
+              const joinDateVal = employee.joinDate
+                ? new Date(employee.joinDate).toISOString().split('T')[0]
+                : '';
+              this.employeeForm.patchValue({
+                name: employee.name,
+                email: employee.email,
+                phone: employee.phone,
+                joinDate: joinDateVal,
+                status: employee.status ?? 'Active',
+                employeeId: employee.employeeId ?? '',
+                departmentId: employee.departmentId ?? null,
+                positionId: employee.positionId ?? null,
+                role: employee.role ?? 'EMPLOYEE'
+              });
+              this.cdr.detectChanges();
+            },
+            error: () => {
+              this.error = 'Failed to load employee data.';
+              this.cdr.detectChanges();
+            }
+          });
       } else {
         this.employeeForm.get('password')?.enable();
         this.employeeForm.get('username')?.enable();
@@ -96,9 +134,17 @@ export class EmployeeFormComponent implements OnInit {
     }
 
     const raw = this.employeeForm.value;
-    const employeeData = { ...raw, joinDate: this.formatJoinDateForApi(raw.joinDate) };
+    const employeeData: Record<string, unknown> = {
+      ...raw,
+      joinDate: this.formatJoinDateForApi(raw.joinDate),
+      departmentId: raw.departmentId ?? undefined,
+      positionId: raw.positionId ?? undefined
+    };
     if (this.isEditMode && this.employeeForm.get('password')?.disabled) {
-      delete employeeData.password;
+      delete employeeData['password'];
+    }
+    if (this.isEditMode) {
+      delete employeeData['username'];
     }
 
     if (this.isEditMode && this.employeeId) {
@@ -107,7 +153,7 @@ export class EmployeeFormComponent implements OnInit {
           this.router.navigate(['/employees']);
           this.loading = false;
         },
-        (error: any) => { // Add type for error
+        () => {
           this.error = 'Failed to update employee.';
           this.loading = false;
         }
@@ -118,7 +164,7 @@ export class EmployeeFormComponent implements OnInit {
           this.router.navigate(['/employees']);
           this.loading = false;
         },
-        (error: any) => { // Add type for error
+        () => {
           this.error = 'Failed to create employee.';
           this.loading = false;
         }

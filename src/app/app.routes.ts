@@ -62,6 +62,42 @@ export const routes: Routes = [
                 canActivate: [roleGuard],
                 data: { expectedRoles: ['ADMIN'] },
                 loadComponent: () => import('./pages/department/department-list.component').then(m => m.DepartmentListComponent),
+            },
+            {
+                path: 'positions',
+                canActivate: [roleGuard],
+                data: { expectedRoles: ['ADMIN'] },
+                loadComponent: () => import('./pages/setup/position-list/position-list.component').then(m => m.PositionListComponent),
+            },
+            {
+                path: 'roles',
+                canActivate: [roleGuard],
+                data: { expectedRoles: ['ADMIN'] },
+                loadComponent: () => import('./pages/setup/role-list/role-list.component').then(m => m.RoleListComponent),
+            },
+            {
+                path: 'admin/roles',
+                canActivate: [roleGuard],
+                data: { expectedRoles: ['ADMIN'] },
+                loadComponent: () => import('./pages/setup/role-list/role-list.component').then(m => m.RoleListComponent),
+            },
+            {
+                path: 'admin/menus',
+                canActivate: [roleGuard],
+                data: { expectedRoles: ['ADMIN'] },
+                loadComponent: () => import('./pages/setup/menu-list/menu-list.component').then(m => m.MenuListComponent),
+            },
+            {
+                path: 'admin/role-menus',
+                canActivate: [roleGuard],
+                data: { expectedRoles: ['ADMIN'] },
+                loadComponent: () => import('./pages/setup/role-menu-mapping/role-menu-mapping.component').then(m => m.RoleMenuMappingComponent),
+            },
+            {
+                path: 'users',
+                canActivate: [roleGuard],
+                data: { expectedRoles: ['ADMIN'] },
+                loadComponent: () => import('./pages/setup/users-placeholder/users-placeholder.component').then(m => m.UsersPlaceholderComponent),
             }
         ]
     },

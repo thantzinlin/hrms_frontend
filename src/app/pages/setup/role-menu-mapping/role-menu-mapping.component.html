@@ -1,0 +1,86 @@
+<div class="mx-auto w-full max-w-7xl">
+  <div class="mb-6">
+    <h1 class="text-xl font-semibold text-gray-800 sm:text-2xl">Role-Menu Mapping</h1>
+    <p class="mt-1 text-sm text-gray-600">Assign menus to roles (Admin)</p>
+  </div>
+
+  @if (error) {
+    <div class="mb-4 rounded-r-lg border-l-4 border-red-500 bg-red-50 p-3 text-sm text-red-700 sm:p-4" role="alert">
+      {{ error }}
+    </div>
+  }
+
+  <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+    <div class="mb-6">
+      <label for="roleSelect" class="block text-sm font-medium text-gray-700">Select role</label>
+      <select
+        id="roleSelect"
+        [ngModel]="selectedRoleId"
+        (ngModelChange)="onRoleChange($event)"
+        class="mt-1 block w-full max-w-xs rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
+        <option [ngValue]="null">— Select role —</option>
+        @for (r of roles; track roleId(r)) {
+          <option [ngValue]="roleId(r)">{{ roleName(r) }}</option>
+        }
+      </select>
+    </div>
+
+    @if (loading && selectedRoleId != null) {
+      <div class="flex items-center justify-center py-12">
+        <div class="h-10 w-10 animate-spin rounded-full border-4 border-b-4 border-blue-500"></div>
+      </div>
+    } @else if (selectedRoleId != null) {
+      <div class="mb-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          (click)="selectAll()"
+          class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+          Select all
+        </button>
+        <button
+          type="button"
+          (click)="clearAll()"
+          class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+          Clear all
+        </button>
+        <button
+          type="button"
+          (click)="save()"
+          [disabled]="saving"
+          class="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+          {{ saving ? 'Saving...' : 'Save mapping' }}
+        </button>
+      </div>
+
+      @if (loadingMenus) {
+        <div class="flex items-center justify-center py-8">
+          <div class="h-8 w-8 animate-spin rounded-full border-4 border-b-4 border-blue-500"></div>
+        </div>
+      } @else {
+        <div class="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
+          @for (m of menus; track menuId(m)) {
+            @if (menuId(m); as mid) {
+              <label
+                class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(mid)"
+                  (change)="toggleMenu(mid)"
+                  class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <span class="text-sm font-medium text-gray-900">{{ menuName(m) }}</span>
+                @if (m.url) {
+                  <span class="text-xs text-gray-500">{{ m.url }}</span>
+                }
+              </label>
+            }
+          }
+        </div>
+        @if (menus.length === 0) {
+          <p class="py-8 text-center text-sm text-gray-600">No menus available. Add menus first.</p>
+        }
+      }
+    } @else if (!loading && roles.length === 0) {
+      <p class="py-8 text-center text-sm text-gray-600">No roles available. Add roles first.</p>
+    }
+  </div>
+</div>
