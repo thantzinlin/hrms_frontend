@@ -24,7 +24,7 @@ export class OvertimeService {
     return this.api.put(`overtime/${id}/status`, { status });
   }
 
-  getByEmployee(employeeId: number): Observable<any> {
+  getByEmployee(employeeId: string): Observable<any> {
     return this.api.get<any>(`overtime/employee/${employeeId}`);
   }
 

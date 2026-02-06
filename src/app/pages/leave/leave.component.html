@@ -129,7 +129,7 @@
             </thead>
             <tbody>
               <tr *ngFor="let request of pendingRequests" class="border-b border-gray-200 last:border-0">
-                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-900">{{ request.employeeId }}</td>
+                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-900">{{ request.employeeName ?? request.employeeId }}</td>
                 <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700">{{ request.leaveType }}</td>
                 <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700 hidden sm:table-cell">{{ request.startDate | date }}</td>
                 <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700 hidden sm:table-cell">{{ request.endDate | date }}</td>

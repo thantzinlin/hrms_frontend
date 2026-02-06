@@ -77,7 +77,8 @@ export class ApiService {
     if (body == null) return body as T;
     const b = body as Record<string, unknown>;
     if (b['returnCode'] !== undefined && b['returnMessage'] !== undefined) {
-      if (b['returnCode'] === '200') return (b['data'] ?? body) as T;
+      const code = b['returnCode'];
+      if (code === '200' || code === 200) return (b['data'] ?? body) as T;
       throw {
         status: 0,
         message: (b['returnMessage'] as string) || `API Error: ${b['returnCode']}`,

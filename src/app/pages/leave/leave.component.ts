@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs/operators';
@@ -26,7 +26,8 @@ export class LeaveComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private leaveService: LeaveService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {
     this.currentUser = null;
     this.leaveForm = this.formBuilder.group({
@@ -43,17 +44,39 @@ export class LeaveComponent implements OnInit {
     this.loadLeaveRequests();
   }
 
+  /** Extract list from API response: either unwrapped array or { data: array }. */
+  private toLeaveList(value: unknown): Leave[] {
+    if (Array.isArray(value)) return value as Leave[];
+    if (value && typeof value === 'object' && 'data' in value) {
+      const d = (value as { data: unknown }).data;
+      return Array.isArray(d) ? (d as Leave[]) : [];
+    }
+    return [];
+  }
+
   loadLeaveRequests(): void {
-    if (this.currentUser?.id) {
+    if (this.currentUser?.employeeId) {
       this.leaveService.getByEmployee(this.currentUser.employeeId).subscribe({
-        next: (data) => (this.myLeaveRequests = Array.isArray(data) ? data : []),
-        error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Failed to load.')
+        next: (data) => {
+          this.myLeaveRequests = this.toLeaveList(data);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.error = err?.message ?? err?.returnMessage ?? 'Failed to load.';
+          this.cdr.detectChanges();
+        }
       });
     }
     if (this.isManager) {
       this.leaveService.getPending().subscribe({
-        next: (data) => (this.pendingRequests = Array.isArray(data) ? data : []),
-        error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Failed to load.')
+        next: (data) => {
+          this.pendingRequests = this.toLeaveList(data);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.error = err?.message ?? err?.returnMessage ?? 'Failed to load.';
+          this.cdr.detectChanges();
+        }
       });
     }
   }

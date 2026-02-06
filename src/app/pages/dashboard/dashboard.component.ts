@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs/operators';
 import { DashboardService } from '../../core/services/dashboard.service';
@@ -9,6 +9,7 @@ export interface DashboardStats {
   totalDepartments?: number;
   pendingLeaveRequests?: number;
   pendingOtRequests?: number;
+  todayAttendanceCount?: number;
   [key: string]: unknown;
 }
 
@@ -26,27 +27,44 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private dashboardService: DashboardService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    // Only call API when user is authenticated so the request includes the token (avoids 401 during hydration or race)
     if (!this.authService.currentUserValue?.token) {
       this.loading = false;
       this.error = 'Not authenticated.';
+      this.cdr.detectChanges();
       return;
     }
     this.dashboardService
       .getStats()
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }))
       .subscribe({
         next: (data) => {
-          this.stats = (data ?? null) as DashboardStats | null;
+          const raw = (data ?? null) as Record<string, unknown> | null;
+          if (raw && typeof raw === 'object') {
+            this.stats = {
+              totalEmployees: Number(raw['totalEmployees'] ?? 0),
+              totalDepartments: Number(raw['totalDepartments'] ?? 0),
+              pendingLeaveRequests: Number(raw['pendingLeaveCount'] ?? raw['pendingLeaveRequests'] ?? 0),
+              pendingOtRequests: Number(raw['pendingOvertimeCount'] ?? raw['pendingOtRequests'] ?? 0),
+              todayAttendanceCount: Number(raw['todayAttendanceCount'] ?? 0)
+            };
+          } else {
+            this.stats = null;
+          }
           this.error = '';
+          this.cdr.detectChanges();
         },
         error: (err) => {
           this.error = err?.message ?? err?.returnMessage ?? 'Failed to load dashboard.';
           this.stats = null;
+          this.cdr.detectChanges();
         }
       });
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs/operators';
@@ -16,8 +16,8 @@ import { User } from '../../models/user.model';
 })
 export class OvertimeComponent implements OnInit {
   form: FormGroup;
-  myRequests: Overtime[] = []; // Add type
-  pendingRequests: Overtime[] = []; // Add type
+  myRequests: Overtime[] = [];
+  pendingRequests: Overtime[] = [];
   loading = false;
   error = '';
   isManager = false;
@@ -25,9 +25,10 @@ export class OvertimeComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private overtimeService: OvertimeService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {
-    this.form = this.fb.group({ // Initialize in constructor
+    this.form = this.fb.group({
       date: ['', Validators.required],
       hours: [1, [Validators.required, Validators.min(0.5)]],
       reason: ['', Validators.required]
@@ -35,22 +36,44 @@ export class OvertimeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.isManager = this.authService.hasRole('ADMIN') || this.authService.hasRole('MANAGER');
+    this.isManager = this.authService.hasRole('ADMIN') || this.authService.hasRole('MANAGER') || this.authService.hasRole('HR');
     this.loadRequests();
+  }
+
+  /** Extract list from API response: either unwrapped array or { data: array }. */
+  private toOvertimeList(value: unknown): Overtime[] {
+    if (Array.isArray(value)) return value as Overtime[];
+    if (value && typeof value === 'object' && 'data' in value) {
+      const d = (value as { data: unknown }).data;
+      return Array.isArray(d) ? (d as Overtime[]) : [];
+    }
+    return [];
   }
 
   loadRequests(): void {
     const user = this.authService.currentUserValue;
-    if (user?.id) {
-      this.overtimeService.getByEmployee(user.id).subscribe({
-        next: (data) => (this.myRequests = Array.isArray(data) ? data : []),
-        error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Failed to load.')
+    if (user?.employeeId) {
+      this.overtimeService.getByEmployee(user.employeeId).subscribe({
+        next: (data) => {
+          this.myRequests = this.toOvertimeList(data);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.error = err?.message ?? err?.returnMessage ?? 'Failed to load.';
+          this.cdr.detectChanges();
+        }
       });
     }
     if (this.isManager) {
       this.overtimeService.getPending().subscribe({
-        next: (data) => (this.pendingRequests = Array.isArray(data) ? data : []),
-        error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Failed to load.')
+        next: (data) => {
+          this.pendingRequests = this.toOvertimeList(data);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.error = err?.message ?? err?.returnMessage ?? 'Failed to load.';
+          this.cdr.detectChanges();
+        }
       });
     }
   }
@@ -60,7 +83,7 @@ export class OvertimeComponent implements OnInit {
     const user = this.authService.currentUserValue;
     if (!user?.id) return;
     this.loading = true;
-    const payload = { ...this.form.value, employeeId: user.id };
+    const payload = { ...this.form.value, employeeId: user.employeeId };
     this.overtimeService
       .create(payload)
       .pipe(finalize(() => (this.loading = false)))
