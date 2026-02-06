@@ -8,6 +8,11 @@ import { Role } from '../../../models/role.model';
 import { AdminMenu } from '../../../models/admin-menu.model';
 import { MessageDialogService } from '../../../core/services/message-dialog.service';
 
+export interface MenuDisplayItem {
+  menu: AdminMenu;
+  depth: number;
+}
+
 @Component({
   selector: 'app-role-menu-mapping',
   standalone: true,
@@ -18,6 +23,7 @@ import { MessageDialogService } from '../../../core/services/message-dialog.serv
 export class RoleMenuMappingComponent implements OnInit {
   roles: Role[] = [];
   menus: AdminMenu[] = [];
+  menuDisplayList: MenuDisplayItem[] = [];
   selectedRoleId: number | null = null;
   selectedMenuIds = new Set<number>();
   loading = false;
@@ -81,13 +87,70 @@ export class RoleMenuMappingComponent implements OnInit {
       .subscribe({
         next: (data) => {
           this.menus = Array.isArray(data) ? data : [];
+          this.menuDisplayList = this.buildMenuDisplayList(this.menus);
           this.cdr.detectChanges();
         },
         error: () => {
           this.menus = [];
+          this.menuDisplayList = [];
           this.cdr.detectChanges();
         }
       });
+  }
+
+  /** Build tree from flat list, then flatten to display list with depth for indentation. */
+  buildMenuDisplayList(flat: AdminMenu[]): MenuDisplayItem[] {
+    const tree = this.buildMenuTree(flat);
+    return this.flattenMenuTree(tree, 0);
+  }
+
+  private buildMenuTree(flat: AdminMenu[]): AdminMenu[] {
+    const byId = new Map<number, AdminMenu>();
+    flat.forEach((m) => {
+      const id = this.menuId(m);
+      if (id != null) byId.set(id, { ...m, children: [] });
+    });
+    const roots: AdminMenu[] = [];
+    byId.forEach((node) => {
+      const parentId = node.parentId ?? null;
+      if (parentId == null || !byId.has(parentId)) {
+        roots.push(node);
+      } else {
+        const parent = byId.get(parentId);
+        if (parent) {
+          parent.children = parent.children ?? [];
+          parent.children.push(node);
+        } else {
+          roots.push(node);
+        }
+      }
+    });
+    roots.sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0));
+    byId.forEach((node) => {
+      if (node.children?.length) node.children.sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0));
+    });
+    return roots;
+  }
+
+  private flattenMenuTree(nodes: AdminMenu[], depth: number): MenuDisplayItem[] {
+    const result: MenuDisplayItem[] = [];
+    nodes.forEach((menu) => {
+      result.push({ menu, depth });
+      if (menu.children?.length) result.push(...this.flattenMenuTree(menu.children, depth + 1));
+    });
+    return result;
+  }
+
+  /** Recursively collect all menuId values from a tree (API returns menus with nested children). */
+  private collectMenuIdsFromTree(nodes: { menuId?: number; children?: unknown[] }[]): number[] {
+    const ids: number[] = [];
+    nodes.forEach((node) => {
+      if (node.menuId != null) ids.push(node.menuId);
+      if (Array.isArray(node.children) && node.children.length) {
+        ids.push(...this.collectMenuIdsFromTree(node.children as { menuId?: number; children?: unknown[] }[]));
+      }
+    });
+    return ids;
   }
 
   onRoleChange(value: number | null): void {
@@ -119,7 +182,7 @@ export class RoleMenuMappingComponent implements OnInit {
           const first = raw[0];
           if (first != null && typeof first === 'object' && 'menuId' in first) {
             this.selectedMenuIds = new Set(
-              (raw as { menuId?: number }[]).map((m) => m.menuId).filter((id): id is number => id != null)
+              this.collectMenuIdsFromTree(raw as { menuId?: number; children?: unknown[] }[])
             );
           } else {
             this.selectedMenuIds = new Set(raw.filter((id): id is number => typeof id === 'number'));

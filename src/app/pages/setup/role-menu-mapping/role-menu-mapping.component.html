@@ -57,25 +57,26 @@
           <div class="h-8 w-8 animate-spin rounded-full border-4 border-b-4 border-blue-500"></div>
         </div>
       } @else {
-        <div class="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
-          @for (m of menus; track menuId(m)) {
-            @if (menuId(m); as mid) {
+        <div class="space-y-1 rounded-lg border border-gray-200 bg-gray-50/50 p-2">
+          @for (item of menuDisplayList; track menuId(item.menu)) {
+            @if (menuId(item.menu); as mid) {
               <label
-                class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 hover:bg-gray-50">
+                class="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 hover:bg-gray-100"
+                [style.padding-left.rem]="1.25 + item.depth * 1.5">
                 <input
                   type="checkbox"
                   [checked]="isSelected(mid)"
                   (change)="toggleMenu(mid)"
-                  class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                <span class="text-sm font-medium text-gray-900">{{ menuName(m) }}</span>
-                @if (m.url) {
-                  <span class="text-xs text-gray-500">{{ m.url }}</span>
+                  class="h-4 w-4 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <span class="text-sm font-medium text-gray-900">{{ menuName(item.menu) }}</span>
+                @if (item.menu.url) {
+                  <span class="text-xs text-gray-500">{{ item.menu.url }}</span>
                 }
               </label>
             }
           }
         </div>
-        @if (menus.length === 0) {
+        @if (menuDisplayList.length === 0) {
           <p class="py-8 text-center text-sm text-gray-600">No menus available. Add menus first.</p>
         }
       }
