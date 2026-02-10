@@ -52,6 +52,14 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/overtime/overtime.component').then(m => m.OvertimeComponent),
             },
             {
+                path: 'approvals',
+                loadComponent: () => import('./pages/approvals/approvals.component').then(m => m.ApprovalsComponent),
+            },
+            {
+                path: 'org/hierarchy',
+                loadComponent: () => import('./pages/org-hierarchy/org-hierarchy.component').then(m => m.OrgHierarchyComponent),
+            },
+            {
                 path: 'admin/holidays',
                 canActivate: [roleGuard],
                 data: { expectedRoles: ['ADMIN'] },

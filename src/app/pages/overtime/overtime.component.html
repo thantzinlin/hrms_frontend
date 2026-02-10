@@ -40,33 +40,16 @@
             <div class="text-sm sm:text-base font-medium text-gray-900">{{r.date}} — {{r.hours}} hrs</div>
             <div class="text-xs sm:text-sm text-gray-600 truncate">{{r.reason}}</div>
           </div>
-          <div class="text-sm font-medium text-gray-700 flex-shrink-0">{{r.status}}</div>
+          <span class="text-sm font-medium flex-shrink-0 px-2 py-1 rounded"
+                [ngClass]="{
+                  'bg-green-100 text-green-800': r.status === 'APPROVED',
+                  'bg-red-100 text-red-800': r.status === 'REJECTED',
+                  'bg-amber-100 text-amber-800': r.status === 'PENDING_SUPERVISOR' || r.status === 'PENDING_HR'
+                }">{{r.status}}</span>
         </li>
       </ul>
       <p *ngIf="myRequests.length === 0" class="text-sm text-gray-500">No overtime requests yet.</p>
-    </div>
-
-    <div *ngIf="isManager" class="bg-white shadow-sm rounded-xl border border-gray-200 p-4 sm:p-6">
-      <h2 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">Pending Requests</h2>
-      <ul class="divide-y divide-gray-200 space-y-3">
-        <li *ngFor="let p of pendingRequests" class="py-3 sm:py-4">
-          <div class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
-            <div class="min-w-0 flex-1">
-              <div class="text-sm sm:text-base font-medium text-gray-900">{{p.employeeName}} — {{p.date}} — {{p.hours}} hrs</div>
-              <div class="text-xs sm:text-sm text-gray-600 truncate">{{p.reason}}</div>
-            </div>
-            <div class="flex gap-2 flex-shrink-0">
-              <button (click)="approve(p.id)" class="px-3 py-1.5 sm:py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors">
-                Approve
-              </button>
-              <button (click)="reject(p.id)" class="px-3 py-1.5 sm:py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors">
-                Reject
-              </button>
-            </div>
-          </div>
-        </li>
-      </ul>
-      <p *ngIf="pendingRequests.length === 0" class="text-sm text-gray-500">No pending requests.</p>
+      <p class="text-sm text-gray-500 mt-2">To approve or reject requests, go to <a routerLink="/approvals" class="text-blue-600 hover:underline">Approvals</a>.</p>
     </div>
   </div>
 </div>

@@ -1,9 +1,12 @@
+/** Overtime status: PENDING_SUPERVISOR | PENDING_HR | APPROVED | REJECTED */
+export type OvertimeStatus = 'PENDING_SUPERVISOR' | 'PENDING_HR' | 'APPROVED' | 'REJECTED';
+
 export interface Overtime {
-    id: number;
-    employeeId: number;
-    employeeName?: string; // Optional, as it might be populated in the component
-    date: string;
-    hours: number;
-    reason: string;
-    status: string; // PENDING, APPROVED, REJECTED
+  id: number;
+  employeeId: string | number;
+  employeeName?: string;
+  date: string;
+  hours: number;
+  reason: string;
+  status: OvertimeStatus | string;
 }

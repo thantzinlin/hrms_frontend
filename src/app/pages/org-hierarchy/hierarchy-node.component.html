@@ -1,0 +1,11 @@
+<div class="node-block" [style.margin-left.rem]="depth * 1.25">
+  <div class="node-card">
+    <div class="node-name">{{ node.name }}</div>
+    <div class="node-meta">{{ node.employeeId }} · {{ node.email }}</div>
+  </div>
+  <ng-container *ngIf="hasSubordinates">
+    <div class="subordinates">
+      <app-hierarchy-node *ngFor="let sub of node.subordinates; trackBy: trackById" [node]="sub" [depth]="depth + 1"></app-hierarchy-node>
+    </div>
+  </ng-container>
+</div>

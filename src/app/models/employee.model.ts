@@ -11,4 +11,13 @@ export interface Employee {
     positionId?: number;
     position?: string;
     role: string;
+    /** Reporting manager id (for hierarchy). */
+    reportingToId?: number | null;
+    reportingToName?: string;
+    /** Approval authority: can approve leave at supervisor level. */
+    canApproveLeave?: boolean;
+    /** Approval authority: can approve overtime at supervisor level. */
+    canApproveOvertime?: boolean;
+    /** Approval authority: is HR (final approval). */
+    isHr?: boolean;
 }

@@ -21,12 +21,16 @@ export class EmployeeFormComponent implements OnInit {
   employeeForm: FormGroup;
   isEditMode = false;
   employeeId: string | null = null;
+  /** Current employee id when editing (used to exclude self from "Reports to" dropdown). */
+  currentEmployeeId: number | null = null;
   loading = false;
   error = '';
   departments$: Observable<any[]>;
   positions$: Observable<{ positionId: number; positionName: string }[]>;
   roles$: Observable<{ roleName: string; description?: string }[]>;
   submitted = false;
+  /** Employees list for "Reports to" dropdown (content from paginated API). */
+  employeesForReporting$: Observable<Employee[]>;
 
   constructor(
     private fb: FormBuilder,
@@ -49,7 +53,11 @@ export class EmployeeFormComponent implements OnInit {
       password: ['', Validators.required],
       departmentId: [null as number | null, Validators.required],
       positionId: [null as number | null, Validators.required],
-      role: ['', Validators.required]
+      role: ['', Validators.required],
+      reportingToId: [null as number | null],
+      canApproveLeave: [false],
+      canApproveOvertime: [false],
+      isHr: [false]
     });
 
     this.departments$ = this.departmentService.getAllDepartments();
@@ -64,6 +72,9 @@ export class EmployeeFormComponent implements OnInit {
         positionId: p.positionId ?? (p as { id?: number }).id ?? 0,
         positionName: p.positionName ?? (p as { positionName?: string }).positionName ?? ''
       })).filter((p) => p.positionId != null))
+    );
+    this.employeesForReporting$ = this.employeeService.getAll({ size: 500 }).pipe(
+      map((page: { content?: Employee[] }) => (page?.content ?? []) as Employee[])
     );
   }
 
@@ -87,6 +98,7 @@ export class EmployeeFormComponent implements OnInit {
           )
           .subscribe({
             next: (employee: Employee) => {
+              this.currentEmployeeId = employee.id ?? null;
               const joinDateVal = employee.joinDate
                 ? new Date(employee.joinDate).toISOString().split('T')[0]
                 : '';
@@ -99,7 +111,11 @@ export class EmployeeFormComponent implements OnInit {
                 employeeId: employee.employeeId ?? '',
                 departmentId: employee.departmentId ?? null,
                 positionId: employee.positionId ?? null,
-                role: employee.role ?? 'EMPLOYEE'
+                role: employee.role ?? 'EMPLOYEE',
+                reportingToId: employee.reportingToId ?? null,
+                canApproveLeave: employee.canApproveLeave ?? false,
+                canApproveOvertime: employee.canApproveOvertime ?? false,
+                isHr: employee.isHr ?? false
               });
               this.cdr.detectChanges();
             },
@@ -138,7 +154,11 @@ export class EmployeeFormComponent implements OnInit {
       ...raw,
       joinDate: this.formatJoinDateForApi(raw.joinDate),
       departmentId: raw.departmentId ?? undefined,
-      positionId: raw.positionId ?? undefined
+      positionId: raw.positionId ?? undefined,
+      reportingToId: raw.reportingToId ?? null,
+      canApproveLeave: raw.canApproveLeave ?? false,
+      canApproveOvertime: raw.canApproveOvertime ?? false,
+      isHr: raw.isHr ?? false
     };
     if (this.isEditMode && this.employeeForm.get('password')?.disabled) {
       delete employeeData['password'];

@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { LeaveService } from '../../core/services/leave.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -10,7 +11,7 @@ import { User } from '../../models/user.model';
 @Component({
   selector: 'app-leave',
   standalone: true, // Mark as standalone
-  imports: [CommonModule, ReactiveFormsModule], // Import necessary modules
+  imports: [CommonModule, ReactiveFormsModule, RouterModule], // Import necessary modules
   templateUrl: './leave.component.html',
   styleUrls: ['./leave.component.css']
 })
@@ -20,8 +21,6 @@ export class LeaveComponent implements OnInit {
   error = '';
   currentUser: User | null;
   myLeaveRequests: Leave[] = [];
-  pendingRequests: Leave[] = [];
-  isManager = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -40,7 +39,6 @@ export class LeaveComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.authService.currentUserValue;
-    this.isManager = this.authService.hasRole('ADMIN') || this.authService.hasRole('MANAGER');
     this.loadLeaveRequests();
   }
 
@@ -67,18 +65,6 @@ export class LeaveComponent implements OnInit {
         }
       });
     }
-    if (this.isManager) {
-      this.leaveService.getPending().subscribe({
-        next: (data) => {
-          this.pendingRequests = this.toLeaveList(data);
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          this.error = err?.message ?? err?.returnMessage ?? 'Failed to load.';
-          this.cdr.detectChanges();
-        }
-      });
-    }
   }
 
   requestLeave(): void {
@@ -97,17 +83,4 @@ export class LeaveComponent implements OnInit {
       });
   }
 
-  approve(id: number): void {
-    this.leaveService.updateStatus(id, 'APPROVED').subscribe({
-      next: () => this.loadLeaveRequests(),
-      error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Action failed.')
-    });
-  }
-
-  reject(id: number): void {
-    this.leaveService.updateStatus(id, 'REJECTED').subscribe({
-      next: () => this.loadLeaveRequests(),
-      error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Action failed.')
-    });
-  }
 }

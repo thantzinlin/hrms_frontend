@@ -95,13 +95,13 @@
                         [ngClass]="{
                           'text-green-900': leave.status === 'APPROVED',
                           'text-red-900': leave.status === 'REJECTED',
-                          'text-yellow-900': leave.status === 'PENDING'
+                          'text-amber-900': leave.status === 'PENDING_SUPERVISOR' || leave.status === 'PENDING_HR'
                         }">
                     <span aria-hidden class="absolute inset-0 opacity-50 rounded-full"
                           [ngClass]="{
                             'bg-green-200': leave.status === 'APPROVED',
                             'bg-red-200': leave.status === 'REJECTED',
-                            'bg-yellow-200': leave.status === 'PENDING'
+                            'bg-amber-200': leave.status === 'PENDING_SUPERVISOR' || leave.status === 'PENDING_HR'
                           }"></span>
                     <span class="relative">{{ leave.status }}</span>
                   </span>
@@ -112,38 +112,7 @@
         </div>
       </div>
 
-      <!-- Pending Leave Requests (for Managers/Admins) -->
-      <div *ngIf="isManager" class="bg-white shadow-sm rounded-xl border border-gray-200 p-4 sm:p-6">
-        <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Pending Leave Requests for Approval</h2>
-        <div *ngIf="pendingRequests.length === 0" class="text-gray-600 text-sm">No pending leave requests.</div>
-        <div *ngIf="pendingRequests.length > 0" class="overflow-x-auto -mx-2 sm:mx-0 rounded-lg border border-gray-200">
-          <table class="min-w-full leading-normal text-sm">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Employee</th>
-                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
-                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">From</th>
-                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">To</th>
-                <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let request of pendingRequests" class="border-b border-gray-200 last:border-0">
-                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-900">{{ request.employeeName ?? request.employeeId }}</td>
-                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700">{{ request.leaveType }}</td>
-                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700 hidden sm:table-cell">{{ request.startDate | date }}</td>
-                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700 hidden sm:table-cell">{{ request.endDate | date }}</td>
-                <td class="px-3 py-3 sm:px-4 sm:py-4">
-                  <div class="flex flex-wrap gap-2">
-                    <button (click)="approve(request.id)" class="text-green-600 hover:text-green-800 font-medium text-xs sm:text-sm">Approve</button>
-                    <button (click)="reject(request.id)" class="text-red-600 hover:text-red-800 font-medium text-xs sm:text-sm">Reject</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <p class="text-sm text-gray-500 mt-2">To approve or reject requests, go to <a routerLink="/approvals" class="text-indigo-600 hover:underline">Approvals</a>.</p>
     </div>
   </div>
 </div>

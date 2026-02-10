@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { OvertimeService } from '../../core/services/overtime.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -10,17 +11,15 @@ import { User } from '../../models/user.model';
 @Component({
   selector: 'app-overtime',
   standalone: true, // Mark as standalone
-  imports: [CommonModule, ReactiveFormsModule], // Import necessary modules
+  imports: [CommonModule, ReactiveFormsModule, RouterModule], // Import necessary modules
   templateUrl: './overtime.component.html',
   styleUrls: ['./overtime.component.css']
 })
 export class OvertimeComponent implements OnInit {
   form: FormGroup;
   myRequests: Overtime[] = [];
-  pendingRequests: Overtime[] = [];
   loading = false;
   error = '';
-  isManager = false;
 
   constructor(
     private fb: FormBuilder,
@@ -36,7 +35,6 @@ export class OvertimeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.isManager = this.authService.hasRole('ADMIN') || this.authService.hasRole('MANAGER') || this.authService.hasRole('HR');
     this.loadRequests();
   }
 
@@ -56,18 +54,6 @@ export class OvertimeComponent implements OnInit {
       this.overtimeService.getByEmployee(user.employeeId).subscribe({
         next: (data) => {
           this.myRequests = this.toOvertimeList(data);
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          this.error = err?.message ?? err?.returnMessage ?? 'Failed to load.';
-          this.cdr.detectChanges();
-        }
-      });
-    }
-    if (this.isManager) {
-      this.overtimeService.getPending().subscribe({
-        next: (data) => {
-          this.pendingRequests = this.toOvertimeList(data);
           this.cdr.detectChanges();
         },
         error: (err) => {
@@ -96,17 +82,4 @@ export class OvertimeComponent implements OnInit {
       });
   }
 
-  approve(id: number): void {
-    this.overtimeService.updateStatus(id, 'APPROVED').subscribe({
-      next: () => this.loadRequests(),
-      error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Action failed.')
-    });
-  }
-
-  reject(id: number): void {
-    this.overtimeService.updateStatus(id, 'REJECTED').subscribe({
-      next: () => this.loadRequests(),
-      error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Action failed.')
-    });
-  }
 }
