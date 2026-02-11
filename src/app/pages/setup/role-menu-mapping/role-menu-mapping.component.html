@@ -26,9 +26,7 @@
     </div>
 
     @if (loading && selectedRoleId != null) {
-      <div class="flex items-center justify-center py-12">
-        <div class="h-10 w-10 animate-spin rounded-full border-4 border-b-4 border-blue-500"></div>
-      </div>
+      <app-loading></app-loading>
     } @else if (selectedRoleId != null) {
       <div class="mb-4 flex flex-wrap gap-2">
         <button
@@ -53,9 +51,7 @@
       </div>
 
       @if (loadingMenus) {
-        <div class="flex items-center justify-center py-8">
-          <div class="h-8 w-8 animate-spin rounded-full border-4 border-b-4 border-blue-500"></div>
-        </div>
+        <app-loading size="sm"></app-loading>
       } @else {
         <div class="space-y-1 rounded-lg border border-gray-200 bg-gray-50/50 p-2">
           @for (item of menuDisplayList; track menuId(item.menu)) {

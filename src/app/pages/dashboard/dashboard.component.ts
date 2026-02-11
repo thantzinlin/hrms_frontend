@@ -1,8 +1,10 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { AuthService } from '../../core/services/auth.service';
+import { LoadingComponent } from '../../shared/loading/loading.component';
 
 export interface DashboardStats {
   totalEmployees?: number;
@@ -10,13 +12,19 @@ export interface DashboardStats {
   pendingLeaveRequests?: number;
   pendingOtRequests?: number;
   todayAttendanceCount?: number;
+  /** 0–100 */
+  employeeAttendanceRate?: number;
+  /** 0–100 */
+  leaveApprovalRate?: number;
+  /** 0–100 */
+  overtimeUtilization?: number;
   [key: string]: unknown;
 }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, LoadingComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -53,7 +61,10 @@ export class DashboardComponent implements OnInit {
               totalDepartments: Number(raw['totalDepartments'] ?? 0),
               pendingLeaveRequests: Number(raw['pendingLeaveCount'] ?? raw['pendingLeaveRequests'] ?? 0),
               pendingOtRequests: Number(raw['pendingOvertimeCount'] ?? raw['pendingOtRequests'] ?? 0),
-              todayAttendanceCount: Number(raw['todayAttendanceCount'] ?? 0)
+              todayAttendanceCount: Number(raw['todayAttendanceCount'] ?? 0),
+              employeeAttendanceRate: Number(raw['employeeAttendanceRate'] ?? 0),
+              leaveApprovalRate: Number(raw['leaveApprovalRate'] ?? 0),
+              overtimeUtilization: Number(raw['overtimeUtilization'] ?? 0)
             };
           } else {
             this.stats = null;

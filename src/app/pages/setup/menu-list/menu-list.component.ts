@@ -5,11 +5,13 @@ import { finalize, timeout } from 'rxjs/operators';
 import { AdminMenuService } from '../../../core/services/admin-menu.service';
 import { AdminMenu } from '../../../models/admin-menu.model';
 import { MessageDialogService } from '../../../core/services/message-dialog.service';
+import { LoadingComponent } from '../../../shared/loading/loading.component';
+import { PaginationComponent, SortOption } from '../../../shared/pagination/pagination.component';
 
 @Component({
   selector: 'app-menu-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, LoadingComponent, PaginationComponent],
   templateUrl: './menu-list.component.html',
   styleUrls: ['./menu-list.component.css']
 })
@@ -22,6 +24,20 @@ export class MenuListComponent implements OnInit {
   editingId: number | null = null;
   formLoading = false;
   menuForm: FormGroup;
+  page = 0;
+  size = 10;
+  totalPages = 0;
+  totalElements = 0;
+  sort = 'sequence,asc';
+  pageSizeOptions = [10, 20, 50];
+  sortOptions: SortOption[] = [
+    { value: 'sequence,asc', label: 'Sequence (asc)' },
+    { value: 'sequence,desc', label: 'Sequence (desc)' },
+    { value: 'menuId,asc', label: 'ID (asc)' },
+    { value: 'menuId,desc', label: 'ID (desc)' },
+    { value: 'menuName,asc', label: 'Name (A–Z)' },
+    { value: 'menuName,desc', label: 'Name (Z–A)' }
+  ];
 
   constructor(
     private adminMenuService: AdminMenuService,
@@ -43,11 +59,12 @@ export class MenuListComponent implements OnInit {
     this.loadMenus();
   }
 
-  loadMenus(): void {
+  loadMenus(page?: number): void {
+    if (page !== undefined) this.page = page;
     this.loading = true;
     this.error = '';
     this.adminMenuService
-      .getAll()
+      .getPage({ page: this.page, size: this.size, sort: this.sort })
       .pipe(
         timeout(15000),
         finalize(() => {
@@ -57,7 +74,17 @@ export class MenuListComponent implements OnInit {
       )
       .subscribe({
         next: (data) => {
-          this.menus = Array.isArray(data) ? data : [];
+          const raw = data && typeof data === 'object' && 'content' in data ? data : null;
+          if (raw && typeof raw === 'object') {
+            const r = raw as { content?: unknown; totalPages?: number; totalElements?: number };
+            this.menus = Array.isArray(r.content) ? r.content as AdminMenu[] : [];
+            this.totalPages = r.totalPages ?? 0;
+            this.totalElements = r.totalElements ?? this.menus.length;
+          } else {
+            this.menus = Array.isArray(data) ? data as AdminMenu[] : [];
+            this.totalPages = 0;
+            this.totalElements = this.menus.length;
+          }
           this.error = '';
           this.cdr.detectChanges();
         },
@@ -71,6 +98,22 @@ export class MenuListComponent implements OnInit {
     this.adminMenuService.getFlat().subscribe({
       next: (data) => (this.flatMenus = Array.isArray(data) ? data : [])
     });
+  }
+
+  onPageChange(page: number): void {
+    this.loadMenus(page);
+  }
+
+  onPageSizeChange(size: number): void {
+    this.size = size;
+    this.page = 0;
+    this.loadMenus(0);
+  }
+
+  onSortChange(sort: string): void {
+    this.sort = sort;
+    this.page = 0;
+    this.loadMenus(0);
   }
 
   openAdd(): void {
@@ -127,7 +170,7 @@ export class MenuListComponent implements OnInit {
       .pipe(finalize(() => (this.formLoading = false)))
       .subscribe({
         next: () => {
-          this.loadMenus();
+          this.loadMenus(this.page);
           this.cancelForm();
           this.messageDialog.showSuccess('Menu saved successfully.');
         },
@@ -145,7 +188,7 @@ export class MenuListComponent implements OnInit {
     if (!confirm(`Delete menu "${name}"?`)) return;
     this.adminMenuService.delete(id).subscribe({
       next: () => {
-        this.loadMenus();
+        this.loadMenus(this.page);
         this.messageDialog.showSuccess('Menu deleted.');
       },
       error: (err) => {
@@ -167,7 +210,7 @@ export class MenuListComponent implements OnInit {
     return m.menuName ?? '';
   }
 
-  /** Flatten tree for table display (one row per menu, displayName for indentation). */
+  /** Flatten tree for table display (one row per menu, displayName for indentation). When using pagination, menus are already flat. */
   get flatList(): (AdminMenu & { displayName?: string })[] {
     const out: (AdminMenu & { displayName?: string })[] = [];
     const visit = (items: AdminMenu[], depth: number) => {

@@ -121,9 +121,7 @@
   }
 
   @if (loading) {
-    <div class="flex items-center justify-center py-16">
-      <div class="h-12 w-12 animate-spin rounded-full border-4 border-b-4 border-blue-500 sm:h-16 sm:w-16"></div>
-    </div>
+    <app-loading></app-loading>
   }
 
   @if (!loading && !error) {
@@ -167,6 +165,20 @@
       </div>
       @if (flatList.length === 0) {
         <p class="px-4 py-8 text-center text-sm text-gray-600">No menus defined.</p>
+      }
+      @if (totalElements > 0) {
+        <app-pagination
+          [currentPage]="page"
+          [totalPages]="totalPages"
+          [totalElements]="totalElements"
+          [pageSize]="size"
+          [pageSizeOptions]="pageSizeOptions"
+          [sort]="sort"
+          [sortOptions]="sortOptions"
+          (pageChange)="onPageChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)"
+          (sortChange)="onSortChange($event)">
+        </app-pagination>
       }
     </div>
   }

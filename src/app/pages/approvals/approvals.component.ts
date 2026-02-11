@@ -1,13 +1,15 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs/operators';
 import { ApprovalService } from '../../core/services/approval.service';
 import { PendingApprovalItem } from '../../models/approval.model';
+import { LoadingComponent } from '../../shared/loading/loading.component';
 
 @Component({
   selector: 'app-approvals',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LoadingComponent],
   templateUrl: './approvals.component.html',
   styleUrls: ['./approvals.component.css']
 })
@@ -30,15 +32,18 @@ export class ApprovalsComponent implements OnInit {
   loadPending(): void {
     this.loading = true;
     this.error = '';
-    this.approvalService.getPending().subscribe({
+    this.approvalService.getPending().pipe(
+      finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
       next: (data) => {
         this.pending = Array.isArray(data) ? data : [];
-        this.loading = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
         this.error = err?.message ?? err?.returnMessage ?? 'Failed to load pending approvals.';
-        this.loading = false;
         this.cdr.detectChanges();
       }
     });

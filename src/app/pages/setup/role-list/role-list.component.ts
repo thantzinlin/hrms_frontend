@@ -5,11 +5,13 @@ import { finalize, timeout } from 'rxjs/operators';
 import { RoleService } from '../../../core/services/role.service';
 import { Role } from '../../../models/role.model';
 import { MessageDialogService } from '../../../core/services/message-dialog.service';
+import { LoadingComponent } from '../../../shared/loading/loading.component';
+import { PaginationComponent, SortOption } from '../../../shared/pagination/pagination.component';
 
 @Component({
   selector: 'app-role-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, LoadingComponent, PaginationComponent],
   templateUrl: './role-list.component.html',
   styleUrls: ['./role-list.component.css']
 })
@@ -21,6 +23,18 @@ export class RoleListComponent implements OnInit {
   editingId: number | null = null;
   formLoading = false;
   roleForm: FormGroup;
+  page = 0;
+  size = 10;
+  totalPages = 0;
+  totalElements = 0;
+  sort = 'roleId,asc';
+  pageSizeOptions = [10, 20, 50];
+  sortOptions: SortOption[] = [
+    { value: 'roleId,asc', label: 'ID (asc)' },
+    { value: 'roleId,desc', label: 'ID (desc)' },
+    { value: 'roleName,asc', label: 'Role name (A–Z)' },
+    { value: 'roleName,desc', label: 'Role name (Z–A)' }
+  ];
 
   constructor(
     private roleService: RoleService,
@@ -38,11 +52,12 @@ export class RoleListComponent implements OnInit {
     this.loadRoles();
   }
 
-  loadRoles(): void {
+  loadRoles(page?: number): void {
+    if (page !== undefined) this.page = page;
     this.loading = true;
     this.error = '';
     this.roleService
-      .getAll()
+      .getPage({ page: this.page, size: this.size, sort: this.sort })
       .pipe(
         timeout(15000),
         finalize(() => {
@@ -52,7 +67,17 @@ export class RoleListComponent implements OnInit {
       )
       .subscribe({
         next: (data) => {
-          this.roles = Array.isArray(data) ? data : [];
+          const raw = data && typeof data === 'object' && 'content' in data ? data : null;
+          if (raw && typeof raw === 'object') {
+            const r = raw as { content?: unknown; totalPages?: number; totalElements?: number };
+            this.roles = Array.isArray(r.content) ? r.content as Role[] : [];
+            this.totalPages = r.totalPages ?? 0;
+            this.totalElements = r.totalElements ?? this.roles.length;
+          } else {
+            this.roles = Array.isArray(data) ? data as Role[] : [];
+            this.totalPages = 0;
+            this.totalElements = this.roles.length;
+          }
           this.error = '';
           this.cdr.detectChanges();
         },
@@ -63,6 +88,22 @@ export class RoleListComponent implements OnInit {
           this.cdr.detectChanges();
         }
       });
+  }
+
+  onPageChange(page: number): void {
+    this.loadRoles(page);
+  }
+
+  onPageSizeChange(size: number): void {
+    this.size = size;
+    this.page = 0;
+    this.loadRoles(0);
+  }
+
+  onSortChange(sort: string): void {
+    this.sort = sort;
+    this.page = 0;
+    this.loadRoles(0);
   }
 
   openAdd(): void {
@@ -102,7 +143,7 @@ export class RoleListComponent implements OnInit {
       .pipe(finalize(() => (this.formLoading = false)))
       .subscribe({
         next: () => {
-          this.loadRoles();
+          this.loadRoles(this.page);
           this.cancelForm();
           this.messageDialog.showSuccess('Role saved successfully.');
         },
@@ -120,7 +161,7 @@ export class RoleListComponent implements OnInit {
     if (!confirm(`Delete role "${name}"?`)) return;
     this.roleService.delete(id).subscribe({
       next: () => {
-        this.loadRoles();
+        this.loadRoles(this.page);
         this.messageDialog.showSuccess('Role deleted.');
       },
       error: (err) => {

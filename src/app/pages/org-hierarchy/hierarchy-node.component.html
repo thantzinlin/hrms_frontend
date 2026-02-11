@@ -1,7 +1,7 @@
 <div class="node-block" [style.margin-left.rem]="depth * 1.25">
   <div class="node-card">
     <div class="node-name">{{ node.name }}</div>
-    <div class="node-meta">{{ node.employeeId }} · {{ node.email }}</div>
+    <div class="node-meta">{{ node.employeeId }} · {{ node.positionName || '-' }}</div>
   </div>
   <ng-container *ngIf="hasSubordinates">
     <div class="subordinates">

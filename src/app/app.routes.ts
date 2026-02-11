@@ -66,6 +66,12 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/holiday/holiday-list.component').then(m => m.HolidayListComponent),
             },
             {
+                path: 'admin/leave-types',
+                canActivate: [roleGuard],
+                data: { expectedRoles: ['ADMIN'] },
+                loadComponent: () => import('./pages/setup/leave-type-list/leave-type-list.component').then(m => m.LeaveTypeListComponent),
+            },
+            {
                 path: 'departments',
                 canActivate: [roleGuard],
                 data: { expectedRoles: ['ADMIN'] },

@@ -1,13 +1,15 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { finalize } from 'rxjs/operators';
 import { OrgService } from '../../core/services/org.service';
 import { HierarchyNode } from '../../models/hierarchy.model';
 import { HierarchyNodeComponent } from './hierarchy-node.component';
+import { LoadingComponent } from '../../shared/loading/loading.component';
 
 @Component({
   selector: 'app-org-hierarchy',
   standalone: true,
-  imports: [CommonModule, HierarchyNodeComponent],
+  imports: [CommonModule, HierarchyNodeComponent, LoadingComponent],
   templateUrl: './org-hierarchy.component.html',
   styleUrls: ['./org-hierarchy.component.css']
 })
@@ -28,15 +30,18 @@ export class OrgHierarchyComponent implements OnInit {
   loadHierarchy(): void {
     this.loading = true;
     this.error = '';
-    this.orgService.getHierarchy().subscribe({
+    this.orgService.getHierarchy().pipe(
+      finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
       next: (data) => {
         this.roots = this.normalizeHierarchyData(data);
-        this.loading = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
         this.error = err?.message ?? err?.returnMessage ?? 'Failed to load hierarchy.';
-        this.loading = false;
         this.cdr.detectChanges();
       }
     });

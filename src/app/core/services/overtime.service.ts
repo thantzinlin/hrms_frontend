@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { PageParams, PageResponse } from '../../models/pagination.model';
+import { Overtime } from '../../models/overtime.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +14,9 @@ export class OvertimeService {
     return this.api.post('overtime', data);
   }
 
-  getAll(): Observable<any> {
-    return this.api.get<any>('overtime');
+  getAll(params?: PageParams): Observable<PageResponse<Overtime>> {
+    const p = params ? { page: params.page ?? 0, size: params.size ?? 10, sort: params.sort ?? 'date,desc' } : { page: 0, size: 10, sort: 'date,desc' };
+    return this.api.get<PageResponse<Overtime>>('overtime', p as Record<string, string | number>);
   }
 
   getById(id: number): Observable<any> {
@@ -24,11 +27,13 @@ export class OvertimeService {
     return this.api.put(`overtime/${id}/status`, { status });
   }
 
-  getByEmployee(employeeId: string): Observable<any> {
-    return this.api.get<any>(`overtime/employee/${employeeId}`);
+  getByEmployee(employeeId: string, params?: PageParams): Observable<PageResponse<Overtime>> {
+    const p = params ? { page: params.page ?? 0, size: params.size ?? 10, sort: params.sort ?? 'date,desc' } : { page: 0, size: 10, sort: 'date,desc' };
+    return this.api.get<PageResponse<Overtime>>(`overtime/employee/${employeeId}`, p as Record<string, string | number>);
   }
 
-  getPending(): Observable<any> {
-    return this.api.get<any>('overtime/pending');
+  getPending(params?: PageParams): Observable<PageResponse<Overtime>> {
+    const p = params ? { page: params.page ?? 0, size: params.size ?? 10, sort: params.sort ?? 'date,desc' } : { page: 0, size: 10, sort: 'date,desc' };
+    return this.api.get<PageResponse<Overtime>>('overtime/pending', p as Record<string, string | number>);
   }
 }

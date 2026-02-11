@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { Role } from '../../models/role.model';
+import { PageParams, PageResponse } from '../../models/pagination.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,13 @@ export class RoleService {
 
   getAll(): Observable<Role[]> {
     return this.api.get<Role[]>(this.basePath);
+  }
+
+  getPage(params?: PageParams): Observable<PageResponse<Role>> {
+    const p = params
+      ? { page: params.page ?? 0, size: params.size ?? 10, sort: params.sort ?? 'roleId,asc' }
+      : { page: 0, size: 10, sort: 'roleId,asc' };
+    return this.api.get<PageResponse<Role>>(this.basePath, p as Record<string, string | number>);
   }
 
   getById(id: number): Observable<Role> {

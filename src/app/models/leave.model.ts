@@ -8,6 +8,10 @@ export interface Leave {
   startDate: string;
   endDate: string;
   reason: string;
-  leaveType: string;
+  /** @deprecated Use leaveTypeName for display */
+  leaveType?: string;
+  leaveTypeId?: number;
+  leaveTypeCode?: string;
+  leaveTypeName?: string;
   status: LeaveStatus | string;
 }

@@ -4,16 +4,18 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { Employee } from '../../../models/employee.model';
+import { Department } from '../../../models/department.model';
 import { DepartmentService } from '../../../core/services/department.service';
 import { PositionService } from '../../../core/services/position.service';
 import { RoleService } from '../../../core/services/role.service';
 import { Observable } from 'rxjs';
 import { map, finalize, timeout } from 'rxjs/operators';
+import { LoadingComponent } from '../../../shared/loading/loading.component';
 
 @Component({
   selector: 'app-employee-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, LoadingComponent],
   templateUrl: './employee-form.component.html',
   styleUrls: ['./employee-form.component.css']
 })
@@ -60,7 +62,9 @@ export class EmployeeFormComponent implements OnInit {
       isHr: [false]
     });
 
-    this.departments$ = this.departmentService.getAllDepartments();
+    this.departments$ = this.departmentService.getAllDepartments().pipe(
+      map((page: { content?: Department[] }) => (page?.content ?? []) as Department[])
+    );
     this.roles$ = this.roleService.getAll().pipe(
       map((list) => (Array.isArray(list) ? list : []).map((r) => ({
         roleName: r.roleName ?? (r as { roleName?: string }).roleName ?? '',

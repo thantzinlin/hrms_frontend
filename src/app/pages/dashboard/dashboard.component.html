@@ -5,9 +5,7 @@
 </div>
 
 <!-- Loading State -->
-<div *ngIf="loading" class="flex justify-center items-center py-12 sm:py-20">
-  <div class="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-t-4 border-b-4 border-blue-600"></div>
-</div>
+<app-loading *ngIf="loading"></app-loading>
 
 <!-- Error State -->
 <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg" role="alert">
@@ -162,35 +160,35 @@
     </div>
   </div>
 
-  <!-- System Status Card -->
+  <!-- System Overview Card -->
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
     <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">System Overview</h3>
     <div class="space-y-4">
       <div>
         <div class="flex justify-between text-sm mb-2">
           <span class="text-gray-600">Employee Attendance Rate</span>
-          <span class="font-semibold text-gray-900">94%</span>
+          <span class="font-semibold text-gray-900">{{ (stats.employeeAttendanceRate ?? 0) | number:'1.0-0' }}%</span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-2">
-          <div class="bg-green-500 h-2 rounded-full" style="width: 94%"></div>
+          <div class="bg-green-500 h-2 rounded-full transition-[width]" [style.width.%]="stats.employeeAttendanceRate ?? 0"></div>
         </div>
       </div>
       <div>
         <div class="flex justify-between text-sm mb-2">
           <span class="text-gray-600">Leave Approval Rate</span>
-          <span class="font-semibold text-gray-900">87%</span>
+          <span class="font-semibold text-gray-900">{{ (stats.leaveApprovalRate ?? 0) | number:'1.0-0' }}%</span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-2">
-          <div class="bg-blue-500 h-2 rounded-full" style="width: 87%"></div>
+          <div class="bg-blue-500 h-2 rounded-full transition-[width]" [style.width.%]="stats.leaveApprovalRate ?? 0"></div>
         </div>
       </div>
       <div>
         <div class="flex justify-between text-sm mb-2">
           <span class="text-gray-600">Overtime Utilization</span>
-          <span class="font-semibold text-gray-900">62%</span>
+          <span class="font-semibold text-gray-900">{{ (stats.overtimeUtilization ?? 0) | number:'1.0-0' }}%</span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-2">
-          <div class="bg-yellow-500 h-2 rounded-full" style="width: 62%"></div>
+          <div class="bg-yellow-500 h-2 rounded-full transition-[width]" [style.width.%]="stats.overtimeUtilization ?? 0"></div>
         </div>
       </div>
     </div>

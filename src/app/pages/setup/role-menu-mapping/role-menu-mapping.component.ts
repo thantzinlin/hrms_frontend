@@ -7,6 +7,7 @@ import { AdminMenuService } from '../../../core/services/admin-menu.service';
 import { Role } from '../../../models/role.model';
 import { AdminMenu } from '../../../models/admin-menu.model';
 import { MessageDialogService } from '../../../core/services/message-dialog.service';
+import { LoadingComponent } from '../../../shared/loading/loading.component';
 
 export interface MenuDisplayItem {
   menu: AdminMenu;
@@ -16,7 +17,7 @@ export interface MenuDisplayItem {
 @Component({
   selector: 'app-role-menu-mapping',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LoadingComponent],
   templateUrl: './role-menu-mapping.component.html',
   styleUrls: ['./role-menu-mapping.component.css']
 })

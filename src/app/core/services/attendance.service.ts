@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { PageParams, PageResponse } from '../../models/pagination.model';
+import { Attendance } from '../../models/attendance.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,14 +19,19 @@ export class AttendanceService {
   }
 
   getAttendanceByEmployeeAndDateRange(
-    employeeId: String,
+    employeeId: string,
     startDate: string,
-    endDate: string
-  ): Observable<any> {
-    return this.api.get<any>(`attendance/report/employee/${employeeId}`, {
+    endDate: string,
+    params?: PageParams
+  ): Observable<PageResponse<Attendance>> {
+    const p = {
       startDate,
-      endDate
-    });
+      endDate,
+      page: params?.page ?? 0,
+      size: params?.size ?? 10,
+      sort: params?.sort ?? 'date,desc'
+    };
+    return this.api.get<PageResponse<Attendance>>(`attendance/report/employee/${employeeId}`, p as Record<string, string | number>);
   }
 
   getAttendanceByDate(date: string): Observable<any> {

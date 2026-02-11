@@ -30,17 +30,13 @@
           </div>
         </div>
         <div>
-          <label for="leaveType" class="block text-sm font-medium text-gray-700">Leave Type</label>
-          <select id="leaveType" formControlName="leaveType"
+          <label for="leaveTypeId" class="block text-sm font-medium text-gray-700">Leave Type</label>
+          <select id="leaveTypeId" formControlName="leaveTypeId"
                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            <option value="ANNUAL">Annual Leave</option>
-            <option value="SICK">Sick Leave</option>
-            <option value="CASUAL">Casual Leave</option>
-            <option value="MATERNITY">Maternity Leave</option>
-            <option value="PATERNITY">Paternity Leave</option>
-            <option value="UNPAID">Unpaid Leave</option>
+            <option [ngValue]="null" disabled>Select leave type</option>
+            <option *ngFor="let lt of leaveTypes" [ngValue]="lt.id">{{ lt.name }}</option>
           </select>
-          <div *ngIf="leaveForm.controls['leaveType'].invalid && leaveForm.controls['leaveType'].touched" class="text-red-500 text-xs mt-1">
+          <div *ngIf="leaveForm.controls['leaveTypeId'].invalid && leaveForm.controls['leaveTypeId'].touched" class="text-red-500 text-xs mt-1">
             Leave Type is required.
           </div>
         </div>
@@ -72,8 +68,9 @@
       <!-- My Leave Requests -->
       <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-4 sm:p-6">
         <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">My Leave Requests</h2>
-        <div *ngIf="myLeaveRequests.length === 0" class="text-gray-600 text-sm">No leave requests found.</div>
-        <div *ngIf="myLeaveRequests.length > 0" class="overflow-x-auto -mx-2 sm:mx-0 rounded-lg border border-gray-200">
+        <app-loading *ngIf="loadingList" size="sm"></app-loading>
+        <div *ngIf="!loadingList && myLeaveRequests.length === 0" class="text-gray-600 text-sm">No leave requests found.</div>
+        <div *ngIf="!loadingList && myLeaveRequests.length > 0" class="overflow-x-auto -mx-2 sm:mx-0 rounded-lg border border-gray-200">
           <table class="min-w-full leading-normal text-sm">
             <thead class="bg-gray-50">
               <tr>
@@ -86,7 +83,7 @@
             </thead>
             <tbody>
               <tr *ngFor="let leave of myLeaveRequests" class="border-b border-gray-200 last:border-0">
-                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-900">{{ leave.leaveType }}</td>
+                <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-900">{{ leave.leaveTypeName ?? leave.leaveType ?? '-' }}</td>
                 <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700">{{ leave.startDate | date }}</td>
                 <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700">{{ leave.endDate | date }}</td>
                 <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700 hidden md:table-cell max-w-[120px] truncate" title="{{ leave.reason }}">{{ leave.reason }}</td>
@@ -110,9 +107,20 @@
             </tbody>
           </table>
         </div>
+        <app-pagination *ngIf="!loadingList && leaveTotalElements > 0"
+          [currentPage]="leavePage"
+          [totalPages]="leaveTotalPages"
+          [totalElements]="leaveTotalElements"
+          [pageSize]="leaveSize"
+          [pageSizeOptions]="leavePageSizeOptions"
+          [sort]="leaveSort"
+          [sortOptions]="leaveSortOptions"
+          (pageChange)="onLeavePageChange($event)"
+          (pageSizeChange)="onLeavePageSizeChange($event)"
+          (sortChange)="onLeaveSortChange($event)">
+        </app-pagination>
       </div>
 
-      <p class="text-sm text-gray-500 mt-2">To approve or reject requests, go to <a routerLink="/approvals" class="text-indigo-600 hover:underline">Approvals</a>.</p>
     </div>
   </div>
 </div>

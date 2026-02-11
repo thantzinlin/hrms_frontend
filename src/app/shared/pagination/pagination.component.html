@@ -1,0 +1,52 @@
+<div class="pagination-bar flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-gray-200 bg-gray-50 px-4 py-3">
+  <div class="flex flex-wrap items-center gap-3">
+    <div class="flex gap-2">
+      <button type="button" (click)="prev()" [disabled]="isFirstPage"
+        class="rounded-l-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50">
+        Prev
+      </button>
+      @for (p of pageNumbers; track p) {
+        <button type="button" (click)="goToPage(p)"
+          [class.bg-blue-600]="p === currentPage"
+          [class.text-white]="p === currentPage"
+          [class.hover:bg-blue-700]="p === currentPage"
+          [class.bg-gray-200]="p !== currentPage"
+          [class.text-gray-800]="p !== currentPage"
+          [class.hover:bg-gray-300]="p !== currentPage"
+          class="min-w-[2.25rem] rounded px-3 py-2 text-sm font-medium transition-colors">
+          {{ p + 1 }}
+        </button>
+      }
+      <button type="button" (click)="next()" [disabled]="isLastPage"
+        class="rounded-r-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50">
+        Next
+      </button>
+    </div>
+    <!-- @if (sortOptions.length > 0) {
+      <div class="flex items-center gap-2">
+        <label for="pagination-sort" class="text-xs font-medium text-gray-600 whitespace-nowrap">Sort by</label>
+        <select id="pagination-sort" [value]="sort" (change)="onSortChange($event)"
+          class="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+          @for (opt of sortOptions; track opt.value) {
+            <option [value]="opt.value" [selected]="opt.value === sort">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+    } -->
+    <div class="flex items-center gap-2">
+      <label for="pagination-size" class="text-xs font-medium text-gray-600 whitespace-nowrap">Per page</label>
+      <select id="pagination-size" [value]="pageSize" (change)="onPageSizeChange($event)"
+        class="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+        @for (s of pageSizeOptions; track s) {
+          <option [value]="s" [selected]="s === pageSize">{{ s }}</option>
+        }
+      </select>
+    </div>
+  </div>
+  <p class="text-center text-xs text-gray-600 sm:text-sm shrink-0">
+    {{ fromItem }}–{{ toItem }} of {{ totalElements }}
+    @if (totalPages > 0) {
+      <span class="hidden sm:inline"> · Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+    }
+  </p>
+</div>
