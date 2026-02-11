@@ -25,7 +25,7 @@
       </h2>
       <form [formGroup]="holidayForm" (ngSubmit)="save()" class="space-y-4">
         <div>
-          <label for="holidayName" class="block text-sm font-medium text-gray-700">Name</label>
+          <label for="holidayName" class="block text-sm font-medium text-gray-700">Name <span class="text-red-600">*</span></label>
           <input
             type="text"
             id="holidayName"
@@ -36,7 +36,7 @@
           }
         </div>
         <div>
-          <label for="holidayDate" class="block text-sm font-medium text-gray-700">Date</label>
+          <label for="holidayDate" class="block text-sm font-medium text-gray-700">Date <span class="text-red-600">*</span></label>
           <input
             type="date"
             id="holidayDate"

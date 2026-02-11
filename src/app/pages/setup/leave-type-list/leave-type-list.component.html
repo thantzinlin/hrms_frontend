@@ -25,7 +25,7 @@
       </h2>
       <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
         <div>
-          <label for="code" class="block text-sm font-medium text-gray-700">Code</label>
+          <label for="code" class="block text-sm font-medium text-gray-700">Code <span class="text-red-600">*</span></label>
           <input
             type="text"
             id="code"
@@ -37,7 +37,7 @@
           }
         </div>
         <div>
-          <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+          <label for="name" class="block text-sm font-medium text-gray-700">Name <span class="text-red-600">*</span></label>
           <input
             type="text"
             id="name"

@@ -46,7 +46,7 @@ export class OvertimeComponent implements OnInit, OnDestroy {
   ) {
     this.form = this.fb.group({
       date: ['', Validators.required],
-      hours: [1, [Validators.required, Validators.min(0.5)]],
+      hours: [null as number | null, [Validators.required, Validators.min(0.5), Validators.max(12)]],
       reason: ['', Validators.required]
     });
   }

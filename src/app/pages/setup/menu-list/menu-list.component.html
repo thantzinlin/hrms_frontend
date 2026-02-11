@@ -26,7 +26,7 @@
       <form [formGroup]="menuForm" (ngSubmit)="save()" class="space-y-4">
         <div class="grid gap-4 sm:grid-cols-2">
           <div>
-            <label for="menuName" class="block text-sm font-medium text-gray-700">Menu name</label>
+            <label for="menuName" class="block text-sm font-medium text-gray-700">Menu name <span class="text-red-600">*</span></label>
             <input
               type="text"
               id="menuName"
@@ -37,7 +37,7 @@
             }
           </div>
           <div>
-            <label for="moduleCode" class="block text-sm font-medium text-gray-700">Module code</label>
+            <label for="moduleCode" class="block text-sm font-medium text-gray-700">Module code <span class="text-red-600">*</span></label>
             <select
               id="moduleCode"
               formControlName="moduleCode"
@@ -69,7 +69,7 @@
             </select>
           </div>
           <div>
-            <label for="sequence" class="block text-sm font-medium text-gray-700">Sequence</label>
+            <label for="sequence" class="block text-sm font-medium text-gray-700">Sequence <span class="text-red-600">*</span></label>
             <input
               type="number"
               id="sequence"

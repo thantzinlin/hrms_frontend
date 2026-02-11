@@ -14,7 +14,7 @@
       <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Request New Leave</h2>
       <form [formGroup]="leaveForm" (ngSubmit)="requestLeave()" class="space-y-4">
         <div>
-          <label for="startDate" class="block text-sm font-medium text-gray-700">Start Date</label>
+          <label for="startDate" class="block text-sm font-medium text-gray-700">Start Date <span class="text-red-600">*</span></label>
           <input type="date" id="startDate" formControlName="startDate"
                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
           <div *ngIf="leaveForm.controls['startDate'].invalid && leaveForm.controls['startDate'].touched" class="text-red-500 text-xs mt-1">
@@ -22,7 +22,7 @@
           </div>
         </div>
         <div>
-          <label for="endDate" class="block text-sm font-medium text-gray-700">End Date</label>
+          <label for="endDate" class="block text-sm font-medium text-gray-700">End Date <span class="text-red-600">*</span></label>
           <input type="date" id="endDate" formControlName="endDate"
                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
           <div *ngIf="leaveForm.controls['endDate'].invalid && leaveForm.controls['endDate'].touched" class="text-red-500 text-xs mt-1">
@@ -30,7 +30,7 @@
           </div>
         </div>
         <div>
-          <label for="leaveTypeId" class="block text-sm font-medium text-gray-700">Leave Type</label>
+          <label for="leaveTypeId" class="block text-sm font-medium text-gray-700">Leave Type <span class="text-red-600">*</span></label>
           <select id="leaveTypeId" formControlName="leaveTypeId"
                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             <option [ngValue]="null" disabled>Select leave type</option>
@@ -41,7 +41,7 @@
           </div>
         </div>
         <div>
-          <label for="reason" class="block text-sm font-medium text-gray-700">Reason</label>
+          <label for="reason" class="block text-sm font-medium text-gray-700">Reason <span class="text-red-600">*</span></label>
           <textarea id="reason" formControlName="reason" rows="3"
                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
           <div *ngIf="leaveForm.controls['reason'].invalid && leaveForm.controls['reason'].touched" class="text-red-500 text-xs mt-1">
@@ -50,7 +50,7 @@
         </div>
         <div>
           <button type="submit" [disabled]="leaveForm.invalid || loading"
-                  class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                  class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
             <span *ngIf="!loading">Request Leave</span>
             <span *ngIf="loading" class="flex items-center">
               <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

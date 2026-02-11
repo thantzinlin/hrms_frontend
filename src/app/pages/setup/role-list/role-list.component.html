@@ -25,7 +25,7 @@
       </h2>
       <form [formGroup]="roleForm" (ngSubmit)="save()" class="space-y-4">
         <div>
-          <label for="roleName" class="block text-sm font-medium text-gray-700">Role name</label>
+          <label for="roleName" class="block text-sm font-medium text-gray-700">Role name <span class="text-red-600">*</span></label>
           <input
             type="text"
             id="roleName"
