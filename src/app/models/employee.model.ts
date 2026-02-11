@@ -6,6 +6,13 @@ export interface Employee {
     phone: string;
     joinDate: string;
     status: string;
+    fatherName?: string;
+    dateOfBirth?: string;
+    nationality?: string;
+    race?: string;
+    gender?: string;
+    maritalStatus?: string;
+    nrc?: string;
     departmentId: number;
     departmentName?: string;
     positionId?: number;

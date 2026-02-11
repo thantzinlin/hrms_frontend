@@ -67,10 +67,10 @@ export class MessageDialogService {
     const body = obj['error'] && typeof obj['error'] === 'object' ? (obj['error'] as Record<string, unknown>) : obj;
     const bodyObj = body as Record<string, unknown>;
     const message =
-      (bodyObj['returnMessage'] as string) ??
       (bodyObj['message'] as string) ??
-      (obj['returnMessage'] as string) ??
+      (bodyObj['returnMessage'] as string) ??
       (obj['message'] as string) ??
+      (obj['returnMessage'] as string) ??
       'An unexpected error occurred.';
     const data = bodyObj['data'] ?? obj['data'];
     const detail = typeof data === 'string' ? data : undefined;

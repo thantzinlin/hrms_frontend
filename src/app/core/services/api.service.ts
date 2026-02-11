@@ -23,6 +23,18 @@ export class ApiService {
       );
   }
 
+  /** Get raw blob (e.g. for file download). Does not unwrap API response. */
+  getBlob(path: string): Observable<Blob> {
+    const url = this.buildUrl(path);
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError((err) => throwError(() => this.normalizeError(err)))
+    );
+  }
+
+  getBaseUrl(): string {
+    return this.baseUrl;
+  }
+
   post<T>(path: string, body?: unknown): Observable<T> {
     const url = this.buildUrl(path);
     return this.http.post<T>(url, body ?? {}).pipe(
@@ -98,7 +110,10 @@ export class ApiService {
       const e = err as Record<string, unknown>;
       const body = e['error'];
       const bodyObj = body && typeof body === 'object' ? (body as Record<string, unknown>) : null;
+      const dataVal = bodyObj?.['data'];
+      const dataMessage = typeof dataVal === 'string' && dataVal.trim() ? dataVal : null;
       const message =
+        dataMessage ??
         (bodyObj?.['returnMessage'] as string) ??
         (e['message'] as string) ??
         (bodyObj?.['message'] as string) ??

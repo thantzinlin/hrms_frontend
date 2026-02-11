@@ -1,8 +1,10 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { MessageDialogService } from '../../../core/services/message-dialog.service';
 import { Employee } from '../../../models/employee.model';
 import { LoadingComponent } from '../../../shared/loading/loading.component';
 import { PaginationComponent, SortOption } from '../../../shared/pagination/pagination.component';
@@ -10,7 +12,7 @@ import { PaginationComponent, SortOption } from '../../../shared/pagination/pagi
 @Component({
   selector: 'app-employee-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, LoadingComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, RouterModule, LoadingComponent, PaginationComponent],
   templateUrl: './employee-list.component.html',
   styleUrls: ['./employee-list.component.css']
 })
@@ -18,6 +20,7 @@ export class EmployeeListComponent implements OnInit {
   employees: Employee[] = [];
   loading = true;
   error = '';
+  searchTerm = '';
   page = 0;
   size = 10;
   sort = 'id,asc';
@@ -37,6 +40,7 @@ export class EmployeeListComponent implements OnInit {
 
   constructor(
     private employeeService: EmployeeService,
+    private messageDialog: MessageDialogService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -45,7 +49,10 @@ export class EmployeeListComponent implements OnInit {
   }
 
   getEmployees(): void {
-    const params = { page: this.page, size: this.size, sort: this.sort };
+    const params: Record<string, string | number> = { page: this.page, size: this.size, sort: this.sort };
+    if (this.searchTerm && this.searchTerm.trim()) {
+      params['search'] = this.searchTerm.trim();
+    }
     this.loading = true;
     this.error = '';
     this.employeeService
@@ -71,8 +78,11 @@ export class EmployeeListComponent implements OnInit {
   deleteEmployee(id: number | string): void {
     if (!confirm('Delete this employee?')) return;
     this.employeeService.delete(id).subscribe({
-      next: () => this.getEmployees(),
-      error: (err) => (this.error = err?.message ?? err?.returnMessage ?? 'Delete failed.')
+      next: () => {
+        this.messageDialog.showSuccess('Employee deleted successfully.');
+        this.getEmployees();
+      },
+      error: (err) => this.messageDialog.showApiError(err)
     });
   }
 
@@ -111,6 +121,17 @@ export class EmployeeListComponent implements OnInit {
     const [currentField, currentDir] = this.sort.split(',');
     const dir = currentField === field && currentDir === 'asc' ? 'desc' : 'asc';
     this.sort = `${field},${dir}`;
+    this.page = 0;
+    this.getEmployees();
+  }
+
+  onSearch(): void {
+    this.page = 0;
+    this.getEmployees();
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
     this.page = 0;
     this.getEmployees();
   }

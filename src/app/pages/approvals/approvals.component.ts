@@ -100,13 +100,25 @@ export class ApprovalsComponent implements OnInit {
   }
 
   labelType(item: PendingApprovalItem): string {
-    return item.requestType === 'LEAVE' ? 'Leave' : 'Overtime';
+    if (item.requestType === 'LEAVE') return 'Leave';
+    if (item.requestType === 'OVERTIME') return 'Overtime';
+    if (item.requestType === 'CLAIM') return 'Claim';
+    return item.requestType ?? '';
   }
 
   labelDates(item: PendingApprovalItem): string {
     if (item.requestType === 'LEAVE') {
       return `${item.startDate} – ${item.endDate ?? ''}`;
     }
-    return `${item.startDate}${item.hours != null ? ` · ${item.hours} hrs` : ''}`;
+    if (item.requestType === 'OVERTIME') {
+      return `${item.startDate}${item.hours != null ? ` · ${item.hours} hrs` : ''}`;
+    }
+    if (item.requestType === 'CLAIM') {
+      const parts = [item.startDate];
+      if (item.claimType) parts.push(item.claimType);
+      if (item.amount != null) parts.push(`${item.amount.toFixed(2)}`);
+      return parts.join(' · ');
+    }
+    return item.startDate ?? '';
   }
 }

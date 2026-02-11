@@ -1,0 +1,80 @@
+<div class="w-full max-w-7xl mx-auto">
+  <div class="mb-2 sm:mb-4 flex flex-col gap-4">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-semibold text-gray-800">Users</h1>
+      <p class="mt-1 text-sm text-gray-600">View system users (read-only)</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="relative">
+        <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="onSearch()"
+               placeholder="Search User ID, Username, Email, Name, Phone"
+               class="w-64 rounded-md border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+        <button type="button" (click)="onSearch()"
+                class="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-indigo-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </button>
+      </div>
+      <button type="button" (click)="onSearch()"
+              class="rounded-md border border-indigo-600 bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+        Search
+      </button>
+      <button *ngIf="searchTerm" type="button" (click)="clearSearch()"
+              class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <app-loading *ngIf="loading"></app-loading>
+
+  <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-3 sm:p-4 rounded-r-lg text-sm text-red-700 mb-4" role="alert">
+    {{error}}
+  </div>
+
+  <div *ngIf="!loading && !error" class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <button type="button" (click)="setSortByColumn('userId')" class="hover:text-gray-900 focus:outline-none">User ID</button>
+            </th>
+            <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <button type="button" (click)="setSortByColumn('username')" class="hover:text-gray-900 focus:outline-none">Username</button>
+            </th>
+            <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <button type="button" (click)="setSortByColumn('email')" class="hover:text-gray-900 focus:outline-none">Email</button>
+            </th>
+            <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</th>
+            <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Phone</th>
+            <th class="px-3 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Roles</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let user of users" class="hover:bg-gray-50">
+            <td class="px-3 py-3 sm:px-4 sm:py-4 whitespace-nowrap text-gray-900 font-medium">{{user.userId}}</td>
+            <td class="px-3 py-3 sm:px-4 sm:py-4 whitespace-nowrap text-gray-900">{{user.username}}</td>
+            <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700 max-w-[200px] truncate" title="{{user.email}}">{{user.email}}</td>
+            <td class="px-3 py-3 sm:px-4 sm:py-4 whitespace-nowrap text-gray-700">{{user.employeeName ?? '-'}}</td>
+            <td class="px-3 py-3 sm:px-4 sm:py-4 whitespace-nowrap text-gray-700">{{user.phone ?? '-'}}</td>
+            <td class="px-3 py-3 sm:px-4 sm:py-4 text-gray-700">{{formatRoles(user.roles)}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-pagination *ngIf="totalElements > 0"
+      [currentPage]="page"
+      [totalPages]="totalPages"
+      [totalElements]="totalElements"
+      [pageSize]="size"
+      [pageSizeOptions]="pageSizeOptions"
+      [sort]="sort"
+      [sortOptions]="sortOptions"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+      (sortChange)="onSortChange($event)">
+    </app-pagination>
+  </div>
+</div>

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { MessageDialogService } from '../../../core/services/message-dialog.service';
 import { Employee } from '../../../models/employee.model';
 import { Department } from '../../../models/department.model';
 import { DepartmentService } from '../../../core/services/department.service';
@@ -26,7 +27,6 @@ export class EmployeeFormComponent implements OnInit {
   /** Current employee id when editing (used to exclude self from "Reports to" dropdown). */
   currentEmployeeId: number | null = null;
   loading = false;
-  error = '';
   departments$: Observable<any[]>;
   positions$: Observable<{ positionId: number; positionName: string }[]>;
   roles$: Observable<{ roleName: string; description?: string }[]>;
@@ -42,6 +42,7 @@ export class EmployeeFormComponent implements OnInit {
     private departmentService: DepartmentService,
     private positionService: PositionService,
     private roleService: RoleService,
+    private messageDialog: MessageDialogService,
     private cdr: ChangeDetectorRef
   ) {
     this.employeeForm = this.fb.group({
@@ -51,15 +52,22 @@ export class EmployeeFormComponent implements OnInit {
       phone: ['', Validators.required],
       joinDate: ['', Validators.required],
       status: ['Active', Validators.required],
-      username: ['', Validators.required],
-      password: ['', Validators.required],
+      fatherName: ['', Validators.required],
+      dateOfBirth: ['', Validators.required],
+      nationality: ['', Validators.required],
+      race: ['', Validators.required],
+      gender: ['', Validators.required],
+      maritalStatus: ['', Validators.required],
+      nrc: ['', Validators.required],
       departmentId: [null as number | null, Validators.required],
       positionId: [null as number | null, Validators.required],
       role: ['', Validators.required],
       reportingToId: [null as number | null],
       canApproveLeave: [false],
       canApproveOvertime: [false],
-      isHr: [false]
+      isHr: [false],
+      username: ['', Validators.required],
+      password: ['', Validators.required]
     });
 
     this.departments$ = this.departmentService.getAllDepartments().pipe(
@@ -88,7 +96,6 @@ export class EmployeeFormComponent implements OnInit {
       if (this.employeeId) {
         this.isEditMode = true;
         this.loading = true;
-        this.error = '';
         this.employeeForm.get('password')?.disable();
         this.employeeForm.get('username')?.disable();
         this.employeeService
@@ -106,12 +113,20 @@ export class EmployeeFormComponent implements OnInit {
               const joinDateVal = employee.joinDate
                 ? new Date(employee.joinDate).toISOString().split('T')[0]
                 : '';
+              const dobVal = employee.dateOfBirth ? new Date(employee.dateOfBirth).toISOString().split('T')[0] : '';
               this.employeeForm.patchValue({
                 name: employee.name,
                 email: employee.email,
                 phone: employee.phone,
                 joinDate: joinDateVal,
                 status: employee.status ?? 'Active',
+                fatherName: employee.fatherName ?? '',
+                dateOfBirth: dobVal,
+                nationality: employee.nationality ?? '',
+                race: employee.race ?? '',
+                gender: employee.gender ?? '',
+                maritalStatus: employee.maritalStatus ?? '',
+                nrc: employee.nrc ?? '',
                 employeeId: employee.employeeId ?? '',
                 departmentId: employee.departmentId ?? null,
                 positionId: employee.positionId ?? null,
@@ -123,8 +138,8 @@ export class EmployeeFormComponent implements OnInit {
               });
               this.cdr.detectChanges();
             },
-            error: () => {
-              this.error = 'Failed to load employee data.';
+            error: (err) => {
+              this.messageDialog.showApiError(err);
               this.cdr.detectChanges();
             }
           });
@@ -149,14 +164,23 @@ export class EmployeeFormComponent implements OnInit {
     this.submitted = true;
 
     if (this.employeeForm.invalid) {
+      this.employeeForm.markAllAsTouched();
       this.loading = false;
+      this.cdr.detectChanges();
       return;
     }
 
-    const raw = this.employeeForm.value;
+    const raw = this.employeeForm.getRawValue();
     const employeeData: Record<string, unknown> = {
       ...raw,
       joinDate: this.formatJoinDateForApi(raw.joinDate),
+      dateOfBirth: (raw.dateOfBirth && String(raw.dateOfBirth).trim()) ? String(raw.dateOfBirth).trim() : null,
+      fatherName: raw.fatherName ?? null,
+      nationality: raw.nationality ?? null,
+      race: raw.race ?? null,
+      gender: raw.gender ?? null,
+      maritalStatus: raw.maritalStatus ?? null,
+      nrc: raw.nrc ?? null,
       departmentId: raw.departmentId ?? undefined,
       positionId: raw.positionId ?? undefined,
       reportingToId: raw.reportingToId ?? null,
@@ -171,28 +195,27 @@ export class EmployeeFormComponent implements OnInit {
       delete employeeData['username'];
     }
 
+    this.loading = true;
     if (this.isEditMode && this.employeeId) {
-      this.employeeService.update(this.employeeId, employeeData).subscribe(
-        () => {
+      this.employeeService.update(this.employeeId, employeeData).pipe(
+        finalize(() => { this.loading = false; this.cdr.detectChanges(); })
+      ).subscribe({
+        next: () => {
+          this.messageDialog.showSuccess('Employee updated successfully.');
           this.router.navigate(['/employees']);
-          this.loading = false;
         },
-        () => {
-          this.error = 'Failed to update employee.';
-          this.loading = false;
-        }
-      );
+        error: (err) => this.messageDialog.showApiError(err)
+      });
     } else {
-      this.employeeService.create(employeeData).subscribe(
-        () => {
+      this.employeeService.create(employeeData).pipe(
+        finalize(() => { this.loading = false; this.cdr.detectChanges(); })
+      ).subscribe({
+        next: () => {
+          this.messageDialog.showSuccess('Employee created successfully.');
           this.router.navigate(['/employees']);
-          this.loading = false;
         },
-        () => {
-          this.error = 'Failed to create employee.';
-          this.loading = false;
-        }
-      );
+        error: (err) => this.messageDialog.showApiError(err)
+      });
     }
   }
 

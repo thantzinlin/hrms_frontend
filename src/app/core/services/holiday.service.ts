@@ -12,8 +12,14 @@ export class HolidayService {
 
   constructor(private api: ApiService) {}
 
+  /** For admin: list all holidays (paginated or full). */
   getAll(): Observable<Holiday[]> {
     return this.api.get<Holiday[]>(this.basePath);
+  }
+
+  /** For employees: read-only list of company holidays (no admin path). */
+  getForEmployees(): Observable<Holiday[]> {
+    return this.api.get<Holiday[]>('holidays');
   }
 
   getPage(params?: PageParams): Observable<PageResponse<Holiday>> {

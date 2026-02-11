@@ -52,6 +52,19 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/overtime/overtime.component').then(m => m.OvertimeComponent),
             },
             {
+                path: 'claims',
+                children: [
+                    {
+                        path: '',
+                        loadComponent: () => import('./pages/claim/claim.component').then(m => m.ClaimComponent),
+                    },
+                    {
+                        path: ':id',
+                        loadComponent: () => import('./pages/claim/claim-detail/claim-detail.component').then(m => m.ClaimDetailComponent),
+                    }
+                ]
+            },
+            {
                 path: 'approvals',
                 loadComponent: () => import('./pages/approvals/approvals.component').then(m => m.ApprovalsComponent),
             },
@@ -70,6 +83,12 @@ export const routes: Routes = [
                 canActivate: [roleGuard],
                 data: { expectedRoles: ['ADMIN'] },
                 loadComponent: () => import('./pages/setup/leave-type-list/leave-type-list.component').then(m => m.LeaveTypeListComponent),
+            },
+            {
+                path: 'admin/claim-types',
+                canActivate: [roleGuard],
+                data: { expectedRoles: ['ADMIN'] },
+                loadComponent: () => import('./pages/setup/claim-type-list/claim-type-list.component').then(m => m.ClaimTypeListComponent),
             },
             {
                 path: 'departments',
@@ -111,7 +130,7 @@ export const routes: Routes = [
                 path: 'users',
                 canActivate: [roleGuard],
                 data: { expectedRoles: ['ADMIN'] },
-                loadComponent: () => import('./pages/setup/users-placeholder/users-placeholder.component').then(m => m.UsersPlaceholderComponent),
+                loadComponent: () => import('./pages/setup/user-list/user-list.component').then(m => m.UserListComponent),
             }
         ]
     },

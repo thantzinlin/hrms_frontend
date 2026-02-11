@@ -6,15 +6,11 @@
 
   <app-loading *ngIf="loading"></app-loading>
 
-  <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-3 sm:p-4 rounded-r-lg text-sm text-red-700 mb-4" role="alert">
-    {{error}}
-  </div>
-
   <div *ngIf="!loading" class="bg-white shadow-sm rounded-xl border border-gray-200 p-4 sm:p-6 mb-8">
     <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
-          <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+          <label for="name" class="block text-sm font-medium text-gray-700">Name <span class="text-red-600">*</span></label>
           <input type="text" id="name" formControlName="name"
                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
           <div *ngIf="f['name'].invalid && f['name'].touched" class="text-red-500 text-xs mt-1">
@@ -23,7 +19,7 @@
         </div>
 
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <label for="email" class="block text-sm font-medium text-gray-700">Email <span class="text-red-600">*</span></label>
           <input type="email" id="email" formControlName="email"
                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
           <div *ngIf="f['email'].invalid && f['email'].touched" class="text-red-500 text-xs mt-1">
@@ -33,7 +29,7 @@
         </div>
 
         <div>
-          <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+          <label for="phone" class="block text-sm font-medium text-gray-700">Phone <span class="text-red-600">*</span></label>
           <input type="text" id="phone" formControlName="phone"
                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
           <div *ngIf="f['phone'].invalid && f['phone'].touched" class="text-red-500 text-xs mt-1">
@@ -42,7 +38,7 @@
         </div>
 
         <div>
-          <label for="joinDate" class="block text-sm font-medium text-gray-700">Join Date</label>
+          <label for="joinDate" class="block text-sm font-medium text-gray-700">Join Date <span class="text-red-600">*</span></label>
           <input type="date" id="joinDate" formControlName="joinDate"
                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
           <div *ngIf="f['joinDate'].invalid && f['joinDate'].touched" class="text-red-500 text-xs mt-1">
@@ -51,7 +47,7 @@
         </div>
 
         <div>
-          <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+          <label for="status" class="block text-sm font-medium text-gray-700">Status <span class="text-red-600">*</span></label>
           <select id="status" formControlName="status"
                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             <option value="Active">Active</option>
@@ -63,8 +59,67 @@
           </div>
         </div>
 
+        <!-- Personal Information -->
+        <div class="sm:col-span-2 border-t border-gray-200 pt-4 mt-2">
+          <p class="text-sm font-medium text-gray-700 mb-3">Personal Information</p>
+        </div>
         <div>
-          <label for="departmentId" class="block text-sm font-medium text-gray-700">Department</label>
+          <label for="fatherName" class="block text-sm font-medium text-gray-700">Father Name <span class="text-red-600">*</span></label>
+          <input type="text" id="fatherName" formControlName="fatherName"
+                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          <div *ngIf="f['fatherName'].invalid && f['fatherName'].touched" class="text-red-500 text-xs mt-1">Father Name is required.</div>
+        </div>
+        <div>
+          <label for="dateOfBirth" class="block text-sm font-medium text-gray-700">Date of Birth <span class="text-red-600">*</span></label>
+          <input type="date" id="dateOfBirth" formControlName="dateOfBirth"
+                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          <div *ngIf="f['dateOfBirth'].invalid && f['dateOfBirth'].touched" class="text-red-500 text-xs mt-1">Date of Birth is required.</div>
+        </div>
+        <div>
+          <label for="nationality" class="block text-sm font-medium text-gray-700">Nationality <span class="text-red-600">*</span></label>
+          <input type="text" id="nationality" formControlName="nationality"
+                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          <div *ngIf="f['nationality'].invalid && f['nationality'].touched" class="text-red-500 text-xs mt-1">Nationality is required.</div>
+        </div>
+        <div>
+          <label for="race" class="block text-sm font-medium text-gray-700">Race <span class="text-red-600">*</span></label>
+          <input type="text" id="race" formControlName="race"
+                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          <div *ngIf="f['race'].invalid && f['race'].touched" class="text-red-500 text-xs mt-1">Race is required.</div>
+        </div>
+        <div>
+          <label for="gender" class="block text-sm font-medium text-gray-700">Gender <span class="text-red-600">*</span></label>
+          <select id="gender" formControlName="gender"
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <option [ngValue]="''" disabled>Select</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+          <div *ngIf="f['gender'].invalid && f['gender'].touched" class="text-red-500 text-xs mt-1">Gender is required.</div>
+        </div>
+        <div>
+          <label for="maritalStatus" class="block text-sm font-medium text-gray-700">Marital Status <span class="text-red-600">*</span></label>
+          <select id="maritalStatus" formControlName="maritalStatus"
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <option [ngValue]="''" disabled>Select</option>
+            <option value="Single">Single</option>
+            <option value="Married">Married</option>
+            <option value="Divorced">Divorced</option>
+            <option value="Widowed">Widowed</option>
+          </select>
+          <div *ngIf="f['maritalStatus'].invalid && f['maritalStatus'].touched" class="text-red-500 text-xs mt-1">Marital Status is required.</div>
+        </div>
+        <div>
+          <label for="nrc" class="block text-sm font-medium text-gray-700">NRC <span class="text-red-600">*</span></label>
+          <input type="text" id="nrc" formControlName="nrc"
+                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                 placeholder="e.g. 12/ABC(N)123456">
+          <div *ngIf="f['nrc'].invalid && f['nrc'].touched" class="text-red-500 text-xs mt-1">NRC is required.</div>
+        </div>
+
+        <div>
+          <label for="departmentId" class="block text-sm font-medium text-gray-700">Department <span class="text-red-600">*</span></label>
           <select id="departmentId" formControlName="departmentId"
                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             <option [ngValue]="null" disabled>Select a department</option>
@@ -76,7 +131,7 @@
         </div>
 
         <div>
-          <label for="positionId" class="block text-sm font-medium text-gray-700">Position</label>
+          <label for="positionId" class="block text-sm font-medium text-gray-700">Position <span class="text-red-600">*</span></label>
           <select id="positionId" formControlName="positionId"
                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             <option [ngValue]="null" disabled>Select a position</option>
@@ -88,7 +143,7 @@
         </div>
 
         <div>
-          <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+          <label for="role" class="block text-sm font-medium text-gray-700">Role <span class="text-red-600">*</span></label>
           <select id="role" formControlName="role"
                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             <option [ngValue]="null" disabled>Select a role</option>
@@ -137,7 +192,7 @@
 
         <!-- Username and Password only for new entries -->
         <div *ngIf="!isEditMode">
-          <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+          <label for="username" class="block text-sm font-medium text-gray-700">Username <span class="text-red-600">*</span></label>
           <input type="text" id="username" formControlName="username"
                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
           <div *ngIf="f['username'].invalid && f['username'].touched" class="text-red-500 text-xs mt-1">
@@ -146,7 +201,7 @@
         </div>
 
         <div *ngIf="!isEditMode">
-          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <label for="password" class="block text-sm font-medium text-gray-700">Password <span class="text-red-600">*</span></label>
           <input type="password" id="password" formControlName="password"
                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
           <div *ngIf="f['password'].invalid && f['password'].touched" class="text-red-500 text-xs mt-1">
