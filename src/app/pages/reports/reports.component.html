@@ -1,0 +1,258 @@
+<div class="w-full max-w-7xl mx-auto">
+  <!-- Page Header -->
+  <div class="mb-6 sm:mb-8">
+    <h1 class="text-xl sm:text-2xl font-semibold text-gray-800">Reports</h1>
+    <p class="mt-1 text-sm text-gray-600">Generate and view HR reports</p>
+  </div>
+
+  <!-- Report Type Tabs -->
+  <div class="mb-6">
+    <div class="flex flex-wrap gap-2 border-b border-gray-200">
+      <button
+        *ngFor="let rt of reportTypes"
+        type="button"
+        (click)="onReportTypeChange(rt.value)"
+        class="px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 -mb-px transition-colors"
+        [class.border-indigo-600]="selectedReportType === rt.value"
+        [class.text-indigo-600]="selectedReportType === rt.value"
+        [class.bg-white]="selectedReportType === rt.value"
+        [class.border-transparent]="selectedReportType !== rt.value"
+        [class.text-gray-600]="selectedReportType !== rt.value"
+        [class.hover:text-gray-800]="selectedReportType !== rt.value"
+      >
+        {{ rt.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Card -->
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-4 sm:p-6 mb-6">
+    <h2 class="text-base font-semibold text-gray-800 mb-4">Report Filters</h2>
+    <form [formGroup]="reportForm" (ngSubmit)="generateReport()" class="flex flex-wrap gap-4 items-end">
+      <div *ngIf="requiresDateRange" class="flex flex-col gap-1">
+        <label for="startDate" class="text-sm font-medium text-gray-700">Start Date</label>
+        <input type="date" id="startDate" formControlName="startDate"
+               class="rounded-md border border-gray-300 py-2 px-3 text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+      </div>
+      <div *ngIf="requiresDateRange" class="flex flex-col gap-1">
+        <label for="endDate" class="text-sm font-medium text-gray-700">End Date</label>
+        <input type="date" id="endDate" formControlName="endDate"
+               class="rounded-md border border-gray-300 py-2 px-3 text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="departmentId" class="text-sm font-medium text-gray-700">Department</label>
+        <select id="departmentId" formControlName="departmentId"
+                class="rounded-md border border-gray-300 py-2 px-3 text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 min-w-[180px]">
+          <option [ngValue]="null">All Departments</option>
+          <option *ngFor="let d of departments" [ngValue]="d.id">{{ d.name }}</option>
+        </select>
+      </div>
+      <button type="submit" [disabled]="loading"
+              class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+        <span *ngIf="!loading">Show</span>
+        <span *ngIf="loading">Generating...</span>
+      </button>
+      <button type="button" (click)="exportExcel()" [disabled]="loading || loadingExport"
+              class="inline-flex items-center px-4 py-2 border border-green-600 text-green-700 bg-white hover:bg-green-50 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <span *ngIf="!loadingExport">Excel</span>
+        <span *ngIf="loadingExport">Exporting...</span>
+      </button>
+      <button type="button" (click)="exportPdf()" [disabled]="loading || loadingExport"
+              class="inline-flex items-center px-4 py-2 border border-red-600 text-red-700 bg-white hover:bg-red-50 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+        </svg>
+        <span *ngIf="!loadingExport">Pdf</span>
+        <span *ngIf="loadingExport">Exporting...</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg mb-6 text-sm text-red-700" role="alert">
+    {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <app-loading *ngIf="loading"></app-loading>
+
+  <!-- Results -->
+  <div *ngIf="!loading && reportGenerated" class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+    <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+      <h3 class="text-base font-semibold text-gray-800">{{ reportTitle }}</h3>
+      <p class="text-sm text-gray-600 mt-0.5">{{ reportData.length }} record(s) found</p>
+    </div>
+
+    <div *ngIf="reportData.length === 0" class="p-8 text-center text-gray-600">
+      No data found for the selected criteria.
+    </div>
+
+    <!-- Attendance Report Table -->
+    <div *ngIf="reportData.length > 0 && selectedReportType === 'attendance'" class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Employee ID</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Check In</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Check Out</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Hours</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let row of attendanceRows" class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-gray-900">{{ row.employeeId ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-900">{{ row.employeeName ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.departmentName ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.date | date }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.checkInTime | date:'shortTime' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.checkOutTime | date:'shortTime' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.workedHours != null ? (row.workedHours | number:'1.1-1') : '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Leave Report Table -->
+    <div *ngIf="reportData.length > 0 && selectedReportType === 'leave'" class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Employee ID</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Leave Type</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">From</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">To</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Reason</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let row of leaveRows" class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-gray-900">{{ row.employeeId ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-900">{{ row.employeeName ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.departmentName ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.leaveTypeName ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.startDate | date }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.endDate | date }}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-1 text-xs font-medium rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': row.status === 'APPROVED',
+                      'bg-red-100 text-red-800': row.status === 'REJECTED',
+                      'bg-amber-100 text-amber-800': row.status?.includes('PENDING')
+                    }">{{ row.status ?? '-' }}</span>
+            </td>
+            <td class="px-4 py-3 text-gray-700 max-w-[150px] truncate" [title]="row.reason ?? ''">{{ row.reason ?? '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Overtime Report Table -->
+    <div *ngIf="reportData.length > 0 && selectedReportType === 'overtime'" class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Employee ID</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Hours</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Reason</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let row of overtimeRows" class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-gray-900">{{ row.employeeId ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-900">{{ row.employeeName ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.departmentName ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.date | date }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.hours ?? '-' }}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-1 text-xs font-medium rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': row.status === 'APPROVED',
+                      'bg-red-100 text-red-800': row.status === 'REJECTED',
+                      'bg-amber-100 text-amber-800': row.status?.includes('PENDING')
+                    }">{{ row.status ?? '-' }}</span>
+            </td>
+            <td class="px-4 py-3 text-gray-700 max-w-[150px] truncate" [title]="row.reason ?? ''">{{ row.reason ?? '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Claim Report Table -->
+    <div *ngIf="reportData.length > 0 && selectedReportType === 'claim'" class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Claim #</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Employee</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Amount</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let row of claimRows" class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-gray-900 font-mono text-xs">{{ row.claimNumber ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-900">{{ row.employeeName ?? row.employeeId ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.departmentName ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.claimTypeName ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.claimDate | date }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.totalAmount | number:'1.2-2' }} {{ row.currency ?? '' }}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-1 text-xs font-medium rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': row.status === 'APPROVED',
+                      'bg-red-100 text-red-800': row.status === 'REJECTED',
+                      'bg-amber-100 text-amber-800': row.status?.includes('PENDING') || row.status === 'DRAFT'
+                    }">{{ row.status ?? '-' }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Employee Summary Table -->
+    <div *ngIf="reportData.length > 0 && selectedReportType === 'employee-summary'" class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Employee ID</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Email</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Position</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Join Date</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let row of employeeSummaryRows" class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-gray-900 font-medium">{{ row.employeeCode ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-900">{{ row.employeeName ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.email ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.departmentName ?? '-' }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ row.positionName ?? '-' }}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">{{ row.status ?? '-' }}</span>
+            </td>
+            <td class="px-4 py-3 text-gray-700">{{ row.joinDate | date }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -24,9 +24,10 @@ export class ApiService {
   }
 
   /** Get raw blob (e.g. for file download). Does not unwrap API response. */
-  getBlob(path: string): Observable<Blob> {
+  getBlob(path: string, params?: Record<string, string | number | boolean>): Observable<Blob> {
     const url = this.buildUrl(path);
-    return this.http.get(url, { responseType: 'blob' }).pipe(
+    const httpParams = this.buildParams(params);
+    return this.http.get(url, { params: httpParams, responseType: 'blob' }).pipe(
       catchError((err) => throwError(() => this.normalizeError(err)))
     );
   }

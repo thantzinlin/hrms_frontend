@@ -69,6 +69,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/approvals/approvals.component').then(m => m.ApprovalsComponent),
             },
             {
+                path: 'reports',
+                loadComponent: () => import('./pages/reports/reports.component').then(m => m.ReportsComponent),
+            },
+            {
                 path: 'org/hierarchy',
                 loadComponent: () => import('./pages/org-hierarchy/org-hierarchy.component').then(m => m.OrgHierarchyComponent),
             },
